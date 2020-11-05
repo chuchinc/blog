@@ -2,7 +2,7 @@
 # 站点配置
 
 baseURL = "https://chuchin.cn/"
-title = "ChuChinRCC"
+title = "ChuChin"
 languageCode = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）
@@ -406,7 +406,7 @@ uglyURLs = false
     # 列表页面
 
     # 宽度
-    listWidth = 42
+    listWidth = 36
     # 说明：如果留空（""），则用 42 作为默认值
     #      单位：em
 
@@ -676,7 +676,7 @@ uglyURLs = false
     # 注意：只支持 HSL 颜色值
 
     # 文章的内容宽度
-    postWidth = 42
+    postWidth = 36
     # 说明：如果留空（""），则用 42 作为默认值
     #      单位：em
 
@@ -1004,7 +1004,7 @@ uglyURLs = false
     enablePostCopyright = true
 
     # 是否显示（全局设置）
-    displayPostCopyright = true
+    displayPostCopyright = false
     # 说明：文章的 Front Matter 中的 `displayCopyright`
     #      的优先级高于此处
 
@@ -1382,5 +1382,5 @@ uglyURLs = false
     homeLayout = "poetry"
     ## 「诗意人生」
     # 诗句，支持 Markdown
-    homePoetry = ["*To see a world in a grain of sand*","*And a heaven in a wild flower*","*Hold infinity in the palm of your hand*","*And eternity in an hour*"]
+    homePoetry = ["*On her way to work one morning*","*Down the path alongside the lake*","*A tender-hearted woman saw a poor half-frozen snake*","*His pretty colored skin had been all frosted with the dew*","*“Oh well,” she cried*","*“I’ll take you in and I’ll take care of you”*","*“Take me in oh tender woman*","*Take me in, for heaven’s sake*","*Take me in oh tender woman,”*","*sighed the snake*"]
     navHeight = "6em"
