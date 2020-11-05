@@ -1,4 +1,4 @@
 +++
-title = "生活"
+title = "Life"
 
 +++
