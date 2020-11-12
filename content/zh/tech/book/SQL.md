@@ -1,13 +1,13 @@
 ---
 title: "《SQL即查即用》"
-date: 2020-11-05T16:28:34+08:00
+date: 2019-11-05T16:28:34+08:00
 draft: false
 tags: ["SQL"]                       
 ---
 
 ![sql](/img/sql.jpg)
 
-配套资料：https://github.com/chuchinc/kl-book-resource
+京东入手的一本工具书，主要介绍SQL知识，比较全，一天一章，边看边记录，配套资料：https://github.com/chuchinc/kl-book-resource
 
 ## 简单查询
 
@@ -163,13 +163,13 @@ SELECT TOP n FROM table;
    SELECT goods_name,market_price FROM shop.goods LIMIT 5;
    ```
 
-   | goods\_name           | market\_price |
-   | :-------------------- | :------------ |
-   | 华为 M2 10.0 平板电脑 | 2388.00       |
-   | 华为 M2 8英寸平板电脑 | 1688.00       |
-   | 荣耀畅玩5X 智能手机   | 1099.00       |
-   | 华为 Mate 8 64GB      | 3799.00       |
-   | 三星55M5 智能液晶电视 | 3899.00       |
+| goods\_name           | market\_price |
+| :-------------------- | :------------ |
+| 华为 M2 10.0 平板电脑 | 2388.00       |
+| 华为 M2 8英寸平板电脑 | 1688.00       |
+| 荣耀畅玩5X 智能手机   | 1099.00       |
+| 华为 Mate 8 64GB      | 3799.00       |
+| 三星55M5 智能液晶电视 | 3899.00       |
 
 ##### 限制查询n条数据
 
@@ -180,13 +180,13 @@ SELECT TOP n FROM table;
    #参数2是要查询记录的个数
    ```
 
-   | goods\_name               | market\_price |
-   | :------------------------ | :------------ |
-   | 荣耀畅玩5X 智能手机       | 1099.00       |
-   | 华为 Mate 8 64GB          | 3799.00       |
-   | 三星55M5 智能液晶电视     | 3899.00       |
-   | TCL D50A710 液晶电视      | 2899.00       |
-   | 海信 LED55EC290N 液晶电视 | 3299.00       |
+| goods\_name               | market\_price |
+| :------------------------ | :------------ |
+| 荣耀畅玩5X 智能手机       | 1099.00       |
+| 华为 Mate 8 64GB          | 3799.00       |
+| 三星55M5 智能液晶电视     | 3899.00       |
+| TCL D50A710 液晶电视      | 2899.00       |
+| 海信 LED55EC290N 液晶电视 | 3299.00       |
 
    ```mysql
    #第4条数据开始的2条数据
@@ -195,10 +195,10 @@ SELECT TOP n FROM table;
    #参数2是查询的起始位置
    ```
 
-   | goods\_name           | market\_price |
-   | :-------------------- | :------------ |
-   | 华为 Mate 8 64GB      | 3799.00       |
-   | 三星55M5 智能液晶电视 | 3899.00       |
+| goods\_name           | market\_price |
+| :-------------------- | :------------ |
+| 华为 Mate 8 64GB      | 3799.00       |
+| 三星55M5 智能液晶电视 | 3899.00       |
 
 #### 在Oracle中限制查询结果
 
@@ -360,3 +360,120 @@ SELECT goods_id AS 商品ID,goods_name 商品名称,1+1,'字符'||'串列'
 FROM goods;
 ```
 
+## 条件查询
+
+### WHERE子句
+
+```mysql
+SELECT <字段列表>
+FROM <表名>
+WHERE <条件表达式>
+```
+| 运算符 | 说明       |
+| ------ | ---------- |
+| =      | 等于       |
+| >      | 大于       |
+| <      | 小于       |
+| >=     | 大于或等于 |
+| <=     | 小于或等于 |
+| !>     | 不大于     |
+| !<     | 不小于     |
+| <>或!= | 不等于     |
+
+### 使用比较运算符限制查询结果
+
+#### 使用“=”查询数据
+
+```mysql
+SELECT * FROM goods WHERE goods_id = 106;
+```
+
+| goods\_id | cat\_id | goods\_name            | click\_count | brand\_id | store\_count | comment\_count | weight | market\_price | shop\_price | cost\_price | is\_new | goods\_type | spec\_type | exchange\_integral | sales\_sum |
+| :-------- | :------ | :--------------------- | :----------- | :-------- | :----------- | :------------- | :----- | :------------ | :---------- | :---------- | :------ | :---------- | :--------- | :----------------- | :--------- |
+| 106       | 131     | 海尔 BCD-572WDPM电冰箱 | 27           | 14        | 1000         | 0              | 500    | 3499.00       | 3399.00     | 3155.00     | 0       | 29          | 0          | 100                | 0          |
+
+#### 使用“>”查询数据
+
+```mysql
+SELECT goods_id,goods_name,click_count FROM goods
+WHERE click_count > 50;
+```
+
+| goods\_id | goods\_name           | click\_count |
+| :-------- | :-------------------- | :----------- |
+| 39        | 华为 M2 10.0 平板电脑 | 52           |
+| 49        | 荣耀畅玩5X 智能手机   | 98           |
+| 56        | 三星55M5 智能液晶电视 | 58           |
+| 57        | TCL D50A710 液晶电视  | 60           |
+
+#### 使用“<”查询数据
+
+```mysql
+SELECT goods_id,goods_name,store_count FROM goods 
+WHERE store_count < 1000;
+```
+
+| goods\_id | goods\_name               | store\_count |
+| :-------- | :------------------------ | :----------- |
+| 56        | 三星55M5 智能液晶电视     | 598          |
+| 57        | TCL D50A710 液晶电视      | 590          |
+| 58        | 海信 LED55EC290N 液晶电视 | 598          |
+
+#### 使用“>=”查询数据
+
+```mysql
+SELECT goods_id,goods_name,sales_sum
+FROM goods
+WHERE sales_sum >= 5;
+```
+
+| goods\_id | goods\_name          | sales\_sum |
+| :-------- | :------------------- | :--------- |
+| 57        | TCL D50A710 液晶电视 | 5          |
+
+#### 使用“<=”查询数据
+
+```mysql
+SELECT goods_id,goods_name,click_count
+FROM goods
+WHERE click_count <= 20;
+```
+
+| goods\_id | goods\_name            | click\_count |
+| :-------- | :--------------------- | :----------- |
+| 51        | 华为 Mate 8 64GB       | 19           |
+| 109       | 三星 BCD-535WKZM电冰箱 | 17           |
+| 114       | 索尼 D7200单反相机     | 15           |
+
+#### 使用“!>”查询数据
+
+MySQL无此运算符
+
+```mysql
+SELECT goods_id,goods_name,shop_price
+FROM goods 
+WHERE shop_price !> 2000; 
+```
+
+#### 使用“!<”查询数据
+
+MySQL无此运算符
+
+```mysql
+SELECT goods_id,goods_name,shop_price
+FROM goods 
+WHERE shop_price !< 2000; 
+```
+
+#### 使用"!="和"<>"查询数据
+
+```mysql
+SELECT goods_id,goods_name,is_new FROM goods WHERE is_new != 0;
+SELECT goods_id,goods_name,is_new FROM goods WHERE is_new <> 0;
+```
+
+| goods\_id | goods\_name            | is\_new |
+| :-------- | :--------------------- | :------ |
+| 41        | 华为 M2 8英寸平板电脑  | 1       |
+| 57        | TCL D50A710 液晶电视   | 1       |
+| 109       | 三星 BCD-535WKZM电冰箱 | 1       |
