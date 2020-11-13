@@ -477,3 +477,207 @@ SELECT goods_id,goods_name,is_new FROM goods WHERE is_new <> 0;
 | 41        | 华为 M2 8英寸平板电脑  | 1       |
 | 57        | TCL D50A710 液晶电视   | 1       |
 | 109       | 三星 BCD-535WKZM电冰箱 | 1       |
+
+## 范围查询
+
+### 查询两个值之间的数据
+
+```MYSQL
+SELECT goods_id AS 商品ID,goods_name 商品名称,market_price AS 市场价
+FROM goods
+WHERE market_price BETWEEN 1000 AND 3000;
+```
+
+| 商品ID | 商品名称              | 市场价  |
+| :----- | :-------------------- | :------ |
+| 39     | 华为 M2 10.0 平板电脑 | 2388.00 |
+| 41     | 华为 M2 8英寸平板电脑 | 1688.00 |
+| 49     | 荣耀畅玩5X 智能手机   | 1099.00 |
+| 57     | TCL D50A710 液晶电视  | 2899.00 |
+
+### 查询两个日期之间的数据
+
+```MYSQL
+SELECT ISBN,BookName,INTime AS 数据录入时间 FROM bookinfo_zerobasis
+WHERE INTime
+BETWEEN '2017-12-1' AND '2018-12-1';
+```
+
+| ISBN          | BookName           | 数据录入时间               |
+| :------------ | :----------------- | :------------------------- |
+| 7-110-12073-5 | 零基础学C#         | 2018-03-17 03:35:13.530000 |
+| 7-110-12073-6 | 零基础学JavaScript | 2018-03-17 03:37:35.467000 |
+| 7-110-12073-7 | 零基础学HTML5+CSS3 | 2018-03-17 03:40:13.167000 |
+| 7-110-12073-8 | 零基础学Oracle     | 2018-01-23 02:05:53.543000 |
+
+### 在BETWEEN中使用日期函数
+
+```MYSQL
+SELECT NOW();
+```
+
+| NOW\(\)             |
+| :------------------ |
+| 2019-11-13 13:07:20 |
+
+```MYSQL
+SELECT ISBN,BookName,INTime 数据录入时间 FROM bookinfo_zerobasis WHERE INTime
+BETWEEN
+DATE_ADD(NOW(),INTERVAL 1 DAY )
+AND
+NOW();
+```
+
+### 查询不在两个数之间的数据
+
+```mysql
+SELECT goods_id,goods_name,market_price
+FROM goods
+WHERE market_price NOT BETWEEN 2000 AND 3000;
+```
+
+| goods\_id | goods\_name               | market\_price |
+| :-------- | :------------------------ | :------------ |
+| 41        | 华为 M2 8英寸平板电脑     | 1688.00       |
+| 49        | 荣耀畅玩5X 智能手机       | 1099.00       |
+| 51        | 华为 Mate 8 64GB          | 3799.00       |
+| 56        | 三星55M5 智能液晶电视     | 3899.00       |
+| 58        | 海信 LED55EC290N 液晶电视 | 3299.00       |
+| 106       | 海尔 BCD-572WDPM电冰箱    | 3499.00       |
+| 109       | 三星 BCD-535WKZM电冰箱    | 3599.00       |
+| 114       | 索尼 D7200单反相机        | 3999.00       |
+
+### 日期时间查询
+
+#### 转换日期格式
+
+##### 把长日期格式数据转换为短日期格式数据
+
+SQL Server
+
+```mysql
+CONVERT(data_type[(length)], expression, style)
+#data_type: 要转换的数据类型
+#express:DATATIME类型的数据
+#style：指定转换形式
+```
+
+MySQL
+
+```mysql
+#DATE转字符串
+SELECT DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s');
+```
+
+| DATE\_FORMAT\(NOW\(\),'%Y-%m-%d %H:%i:%s'\) |
+| :------------------------------------------ |
+| 2020-11-13 13:29:51                         |
+
+```MYSQL
+#字符串转DATE
+SELECT STR_TO_DATE('2020-11-13 13:29:51','%Y-%m-%d')
+```
+
+| STR\_TO\_DATE\('2020-11-13 13:29:51','%Y-%m-%d'\) |
+| :------------------------------------------------ |
+| 2020-11-13                                        |
+
+##### 将日期格式中的“-”转换为“/”
+
+```MYSQL
+SELECT ISBN,bookname,writer,price,intime FROM bookinfo ORDER BY ISBN;
+```
+
+```MYSQL
+SELECT ISBN,bookname, DATE_FORMAT(INTime,'%Y-%m-%d %H:%i:%s') AS 数据录入日期
+FROM bookinfo ORDER BY ISBN;
+```
+
+| ISBN          | bookname                          | 数据录入日期        |
+| :------------ | :-------------------------------- | :------------------ |
+| 7-110-12000-1 | Java项目开发实战入门              | 2018-01-22 06:53:55 |
+| 7-110-12000-2 | C语言项目开发实战入门             | 2018-01-22 06:55:09 |
+| 7-110-12000-3 | Android项目开发实战入门           | 2018-01-22 06:57:14 |
+| 7-110-12000-4 | JavaWeb项目开发实战入门           | 2018-01-22 06:58:19 |
+| 7-110-12000-5 | C++项目开发实战入门               | 2018-01-22 06:58:59 |
+| 7-110-12000-6 | JSP项目开发实战入门               | 2018-01-22 06:59:49 |
+| 7-110-12000-7 | PHP项目开发实战入门               | 2018-01-22 07:12:36 |
+
+```MYSQL
+SELECT ISBN,bookname, REPLACE(DATE_FORMAT(INTime,'%Y-%m-%d %H:%i:%s'),'-','/')
+AS 数据录入日期
+FROM bookinfo ORDER BY ISBN;
+```
+
+| ISBN          | bookname                          | 数据录入日期        |
+| :------------ | :-------------------------------- | :------------------ |
+| 7-110-12000-1 | Java项目开发实战入门              | 2018/01/22 06:53:55 |
+| 7-110-12000-2 | C语言项目开发实战入门             | 2018/01/22 06:55:09 |
+| 7-110-12000-3 | Android项目开发实战入门           | 2018/01/22 06:57:14 |
+| 7-110-12000-4 | JavaWeb项目开发实战入门           | 2018/01/22 06:58:19 |
+| 7-110-12000-5 | C++项目开发实战入门               | 2018/01/22 06:58:59 |
+| 7-110-12000-6 | JSP项目开发实战入门               | 2018/01/22 06:59:49 |
+| 7-110-12000-7 | PHP项目开发实战入门               | 2018/01/22 07:12:36 |
+| 7-110-12000-8 | C#项目开发实战入门                | 2018/01/22 07:13:49 |
+
+#### 计算两个日期的间隔天数
+
+```mysql
+DATEDIFF(datepart,startdate,enddate)
+#datepart规定了应在那一日期部分计算间隔差额的参数
+```
+
+```mysql
+SELECT DATEDIFF('2008-12-30','2008-12-29') AS DiffDate
+```
+
+| DiffDate |
+| :------- |
+| 1        |
+
+#### 按指定日期查询数据
+
+##### DAY()函数
+
+```mysql
+SELECT DAY(0) AS MY_DAY1,DAY('2019-10-09') AS MY_DAY2;
+```
+
+| MY\_DAY1 | MY\_DAY2 |
+| :------- | :------- |
+| 0        | 9        |
+
+##### MONTH()函数
+
+```mysql
+SELECT MONTH('2019-10-09');
+```
+
+| MONTH\('2019-10-09'\) |
+| :-------------------- |
+| 10                    |
+
+##### YEAR()
+
+```MYSQL
+SELECT YEAR('2019-10-09');
+```
+
+| YEAR\('2019-10-09'\) |
+| :------------------- |
+| 2019                 |
+
+##### 综合案例
+
+```mysql
+#查找指定日期的月和年查询
+SELECT BookName,Type,pDate FROM bookinfo
+WHERE MONTH(pDate)=10 AND YEAR(pDate)=2017
+AND Type = '零基础系列';
+```
+
+| BookName           | Type       | pDate      |
+| :----------------- | :--------- | :--------- |
+| 零基础学C#         | 零基础系列 | 2017-10-01 |
+| 零基础学JavaScript | 零基础系列 | 2017-10-01 |
+| 零基础学HTML5+CSS3 | 零基础系列 | 2017-10-01 |
