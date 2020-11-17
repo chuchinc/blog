@@ -681,3 +681,141 @@ AND Type = '零基础系列';
 | 零基础学C#         | 零基础系列 | 2017-10-01 |
 | 零基础学JavaScript | 零基础系列 | 2017-10-01 |
 | 零基础学HTML5+CSS3 | 零基础系列 | 2017-10-01 |
+
+## 使用逻辑运算符过滤数据
+
+### 使用AND运算符
+
+```mysql
+SELECT goods_id,goods_name,shop_price
+FROM goods
+WHERE shop_price > 3000 AND shop_price < 6000;
+```
+
+| goods\_id | goods\_name               | shop\_price |
+| :-------- | :------------------------ | :---------- |
+| 51        | 华为 Mate 8 64GB          | 3699.00     |
+| 56        | 三星55M5 智能液晶电视     | 3799.00     |
+| 58        | 海信 LED55EC290N 液晶电视 | 3199.00     |
+| 106       | 海尔 BCD-572WDPM电冰箱    | 3399.00     |
+| 109       | 三星 BCD-535WKZM电冰箱    | 3499.00     |
+| 114       | 索尼 D7200单反相机        | 3699.00     |
+
+```mysql
+SELECT goods_name,click_count,store_count,shop_price
+FROM goods
+WHERE click_count > 20 AND store_count = 1000 AND shop_price > 2000;
+```
+
+| goods\_name            | click\_count | store\_count | shop\_price |
+| :--------------------- | :----------- | :----------- | :---------- |
+| 华为 M2 10.0 平板电脑  | 52           | 1000         | 2288.00     |
+| 海尔 BCD-572WDPM电冰箱 | 27           | 1000         | 3399.00     |
+
+### 使用OR运算符
+
+```mysql
+SELECT ISBN,BookName,Writer,Price
+FROM bookinfo_zerobasis
+WHERE BookName = '零基础学Java' OR BookName = '零基础学PHP';
+```
+
+| ISBN          | BookName     | Writer   | Price   |
+| :------------ | :----------- | :------- | :------ |
+| 7-110-12073-1 | 零基础学Java | 明日科技 | 69.8000 |
+| 7-110-12073-4 | 零基础学PHP  | 明日科技 | 79.8000 |
+
+```mysql
+SELECT BookName,Price,pDate
+FROM bookinfo
+WHERE BookName LIKE '%PHP%' OR BookName LIKE '%Oracle%' OR BookName LIKE '%Android%';
+```
+
+| BookName                | Price   | pDate      |
+| :---------------------- | :------ | :--------- |
+| Android项目开发实战入门 | 59.8000 | 2017-05-01 |
+| PHP项目开发实战入门     | 69.8000 | 2017-04-01 |
+| 零基础学Android         | 89.8000 | 2017-09-01 |
+| 零基础学PHP             | 79.8000 | 2017-09-01 |
+| 零基础学Oracle          | 79.8000 | 2018-01-09 |
+| Android精彩编程200例    | 89.8000 | 2017-08-01 |
+
+### 使用NOT运算符
+
+```mysql
+SELECT goods_id,goods_name,store_count
+FROM goods
+WHERE NOT store_count = 1000;
+```
+
+| goods\_id | goods\_name               | store\_count |
+| :-------- | :------------------------ | :----------- |
+| 56        | 三星55M5 智能液晶电视     | 598          |
+| 57        | TCL D50A710 液晶电视      | 590          |
+| 58        | 海信 LED55EC290N 液晶电视 | 598          |
+
+```mysql
+SELECT goods_id,goods_name,store_count
+FROM goods
+WHERE store_count != 1000;
+```
+
+| goods\_id | goods\_name               | store\_count |
+| :-------- | :------------------------ | :----------- |
+| 56        | 三星55M5 智能液晶电视     | 598          |
+| 57        | TCL D50A710 液晶电视      | 590          |
+| 58        | 海信 LED55EC290N 液晶电视 | 598          |
+
+### 逻辑运算符的优先级
+
+NOT--->AND--->OR
+
+```MYSQL
+SELECT cat_id,goods_name,shop_price
+FROM goods
+WHERE cat_id = 191 OR cat_id = 123 AND shop_price > 2000;
+```
+
+| cat\_id | goods\_name           | shop\_price |
+| :------ | :-------------------- | :---------- |
+| 191     | 华为 M2 10.0 平板电脑 | 2288.00     |
+| 191     | 华为 M2 8英寸平板电脑 | 1588.00     |
+| 123     | 华为 Mate 8 64GB      | 3699.00     |
+
+```MYSQL
+SELECT cat_id,goods_name,shop_price
+FROM goods
+WHERE (cat_id = 191 OR cat_id = 123) AND shop_price > 2000;
+```
+
+| cat\_id | goods\_name           | shop\_price |
+| :------ | :-------------------- | :---------- |
+| 191     | 华为 M2 10.0 平板电脑 | 2288.00     |
+| 123     | 华为 Mate 8 64GB      | 3699.00     |
+
+```MYSQL
+SELECT BookName,publisher,Writer
+FROM bookinfo
+WHERE (BookName LIKE '%PHP%' OR BookName LIKE '%JSP%') AND (NOT publisher = '机械工业出版社');
+```
+
+| BookName            | publisher      | Writer   |
+| :------------------ | :------------- | :------- |
+| JSP项目开发实战入门 | 吉林大学出版社 | 明日科技 |
+| PHP项目开发实战入门 | 吉林大学出版社 | 明日科技 |
+| 零基础学PHP         | 吉林大学出版社 | 明日科技 |
+
+```MYSQL
+SELECT cat_id,goods_name,shop_price
+FROM goods
+WHERE (NOT cat_id = 191) AND (NOT cat_id = 123);
+```
+
+| cat\_id | goods\_name               | shop\_price |
+| :------ | :------------------------ | :---------- |
+| 130     | 三星55M5 智能液晶电视     | 3799.00     |
+| 130     | TCL D50A710 液晶电视      | 2799.00     |
+| 130     | 海信 LED55EC290N 液晶电视 | 3199.00     |
+| 131     | 海尔 BCD-572WDPM电冰箱    | 3399.00     |
+| 131     | 三星 BCD-535WKZM电冰箱    | 3499.00     |
+| 104     | 索尼 D7200单反相机        | 3699.00     |
