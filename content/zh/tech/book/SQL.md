@@ -819,3 +819,111 @@ WHERE (NOT cat_id = 191) AND (NOT cat_id = 123);
 | 131     | 海尔 BCD-572WDPM电冰箱    | 3399.00     |
 | 131     | 三星 BCD-535WKZM电冰箱    | 3499.00     |
 | 104     | 索尼 D7200单反相机        | 3699.00     |
+
+## 使用IN操作符过滤数据
+
+### 使用IN查询数据
+
+```mysql
+SELECT column_name
+FROM table_name
+WHERE column_name IN (value1,value2,...)
+```
+
+```mysql
+SELECT cat_id,goods_name,shop_price
+FROM goods 
+WHERE cat_id IN (191,123,131);
+```
+
+| cat\_id | goods\_name            | shop\_price |
+| :------ | :--------------------- | :---------- |
+| 191     | 华为 M2 10.0 平板电脑  | 2288.00     |
+| 191     | 华为 M2 8英寸平板电脑  | 1588.00     |
+| 123     | 荣耀畅玩5X 智能手机    | 999.00      |
+| 123     | 华为 Mate 8 64GB       | 3699.00     |
+| 131     | 海尔 BCD-572WDPM电冰箱 | 3399.00     |
+| 131     | 三星 BCD-535WKZM电冰箱 | 3499.00     |
+
+实际上，使用IN操作符实现了与OR运算符相同的功能
+
+```mysql
+SELECT cat_id,goods_name,shop_price
+FROM goods
+WHERE cat_id = 191 OR cat_id = 123 OR cat_id = 131;
+```
+
+还能使用字符类型
+
+```mysql
+SELECT name,cat_name 
+FROM brand 
+WHERE name IN ('OPPO','维维','湾仔码头','华硕/ASUS');
+```
+
+| name      | cat\_name            |
+| :-------- | :------------------- |
+| OPPO      | 手机、数码、配件     |
+| 维维      | 茶冲乳品、酒水、饮料 |
+| 湾仔码头  | 生鲜食品             |
+| 华硕/ASUS | 电脑、平板、办公设备 |
+
+### 在IN中使用算术表达式
+
+```mysql
+SELECT goods_name,shop_price 
+FROM goods 
+WHERE shop_price IN (3799-100,3799,3799+100);
+```
+
+| goods\_name           | shop\_price |
+| :-------------------- | :---------- |
+| 华为 Mate 8 64GB      | 3699.00     |
+| 三星55M5 智能液晶电视 | 3799.00     |
+| 索尼 D7200单反相机    | 3699.00     |
+
+### 在IN中使用列进行查询
+
+```mysql
+SELECT goods_name,market_price,shop_price
+FROM goods
+WHERE 3899 IN (market_price,shop_price);
+```
+
+| goods\_name           | market\_price | shop\_price |
+| :-------------------- | :------------ | :---------- |
+| 三星55M5 智能液晶电视 | 3899.00       | 3799.00     |
+
+### 使用NOT IN查询数据
+
+```mysql
+SELECT column_name
+FROM table_name
+WHERE column_name NOT IN (value1,value2,...)
+```
+
+```mysql
+SELECT BookName,Writer,pDate
+FROM bookinfo_zerobasis
+WHERE pDate NOT IN ('2017年8月','2017年9月');
+```
+
+| BookName           | Writer   | pDate      |
+| :----------------- | :------- | :--------- |
+| 零基础学C#         | 明日科技 | 2017年10月 |
+| 零基础学JavaScript | 明日科技 | 2017年10月 |
+| 零基础学HTML5+CSS3 | 明日科技 | 2017年12月 |
+| 零基础学Oracle     | 明日科技 | 2018年1月  |
+
+### 使用NOT IN查询后两行数据
+
+```mysql
+SELECT order_id,order_sn,total_amount
+FROM orderform
+WHERE order_id NOT IN (SELECT order_id FROM (SELECT order_id FROM orderform ORDER BY order_id ASC LIMIT 8) tt);
+```
+
+| order\_id | order\_sn          | total\_amount |
+| :-------- | :----------------- | :------------ |
+| 835       | 201709271519568300 | 48.00         |
+| 836       | 201709271605249732 | 18000.00      |
