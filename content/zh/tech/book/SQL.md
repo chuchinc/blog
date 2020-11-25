@@ -927,3 +927,79 @@ WHERE order_id NOT IN (SELECT order_id FROM (SELECT order_id FROM orderform ORDE
 | :-------- | :----------------- | :------------ |
 | 835       | 201709271519568300 | 48.00         |
 | 836       | 201709271605249732 | 18000.00      |
+
+## 格式化结果集
+
+### 格式化日期
+
+#### 在SQL Server中格式化日期
+
+```mysql
+CONVERT (data_type[(length)], expression [, style]
+```
+
+* data_type: 规定目标
+
+* length: 数据类型的可选参数
+
+* expression: 需要转换的值
+
+* style：可选参数
+
+#### 在MySQL数据库中格式化日期
+
+```mysql
+DATA_FORMAT(data,format)
+```
+
+```mysql
+SELECT user_id,email,DATA_FORMAT(reg_time, '%Y/%m/%d') AS reg_time
+FROM shop.users LIMIT 6;
+```
+
+#### 在Oracle中格式化日期
+
+```mysql
+TO_CHAR(expression,format)
+```
+
+```mysql
+SELECT user_id,birthday AS 出生日期
+TO_CHAR(birthday,'YYYY-MM-DD') AS 格式化出生日期
+FROM users
+WHERE ROWNUM <= 6;
+```
+
+### 数据表的数值类型转换
+
+#### SQL Server: CAST()函数
+
+```mysql
+CAST(express AS data_type)
+```
+
+```mysql
+SELECT CAST('236' AS int);
+SELECT CAST('236.424' AS int);
+```
+
+#### Oracle: CAST()函数
+
+```mysql
+CAST(express AS data_type)
+```
+
+```mysql
+SELECT CAST('236' AS int) FROM DUAL;
+```
+
+### 去掉空格
+
+```mysql
+LTRIM(character_express)
+```
+
+```mysql
+SELECT LTRIM('  MR') AS '去掉左空格', LTRIM('  BOOK') AS '去掉有右空格  ';
+```
+
