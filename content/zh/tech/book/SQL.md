@@ -1003,3 +1003,82 @@ LTRIM(character_express)
 SELECT LTRIM('  MR') AS '去掉左空格', LTRIM('  BOOK') AS '去掉有右空格  ';
 ```
 
+## 模糊查询
+
+### LIKE谓词
+
+| 通配符 | 说明                                                         |
+| ------ | ------------------------------------------------------------ |
+| %      | 由零个或多个字符组成的任意字符串                             |
+| _      | 任意字符串                                                   |
+| []     | 表示指定范围，例如[A-F]，表示A到F范围内的任意字符串          |
+| [^]    | 表示任意范围之外的，例如   [^ A-F]，表示A到F范围之外的任意字符串 |
+
+### “%”通配符的使用
+
+```mysql
+SELECT goods_id,goods_name,shop_price
+FROM goods
+WHERE goods_name LIKE '%华为%';
+```
+
+| goods\_id | goods\_name           | shop\_price |
+| :-------- | :-------------------- | :---------- |
+| 39        | 华为 M2 10.0 平板电脑 | 2288.00     |
+| 41        | 华为 M2 8英寸平板电脑 | 1588.00     |
+| 51        | 华为 Mate 8 64GB      | 3699.00     |
+
+### "_"通配符的使用
+
+```mysql
+SELECT address_id,LTRIM(consignee) AS consignee, address
+FROM user_address
+WHERE LTRIM(consignee) LIKE '_ _ _';
+```
+
+| address\_id | consignee | address                  |
+| :---------- | :-------- | :----------------------- |
+| 8           | 张乐乐    | 北京西城西四环中路130号  |
+| 11          | 陈家洛    | 上海静安寺南京西路1618号 |
+| 13          | 令狐冲    | 深圳市中福华三路36号     |
+| 16          | 石中玉    | 北京东城崇文门外大街40号 |
+
+### "[]"通配符使用
+
+并不是所有DBMS都支持[]创建的集合，只有SQL Server 和 Access
+
+```mysql
+SELECT order_id,order_sn,total_amount
+FROM orderform
+WHERE order_sn LIKE '%[6-9]';
+```
+
+### “[^]”通配符使用
+
+```mysql
+SELECT TOP 6 id,name,cat_name
+FROM brand
+WHERE name LIKE '[^A-Z]';
+```
+
+### 使用ESCAPE定义转义字符
+
+使用通配符时，数据中也可能包含通配符，则需要进行转义
+
+```mysql
+WHERE 列名 LIKE '%10#%' ESCAPE '#'
+```
+
+```mysql
+SELECT user_id,email
+FROM users
+WHERE email LIKE '%/_%' ESCAPE '/';
+```
+
+| user\_id | email           |
+| :------- | :-------------- |
+| 23       | \_xor@163.com   |
+| 40       | ab\_cd@sina.com |
+
+
+
