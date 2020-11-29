@@ -7,7 +7,7 @@ tags: ["SQL"]
 
 ![sql](/img/sql.jpg)
 
-京东入手的一本工具书，主要介绍SQL知识，比较全，一天一章，边看边记录，配套资料：https://github.com/chuchinc/kl-book-resource
+京东入手的一本工具书，主要介绍SQL的知识，比较全，书中配套资料：[https://github.com/chuchinc/kl-book-resource](https://github.com/chuchinc/kl-book-resource)
 
 ## 简单查询
 
@@ -1053,7 +1053,7 @@ FROM orderform
 WHERE order_sn LIKE '%[6-9]';
 ```
 
-### “[^]”通配符使用
+### "[^]"通配符使用
 
 ```mysql
 SELECT TOP 6 id,name,cat_name

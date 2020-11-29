@@ -7,4 +7,4 @@ tags: ["Java"]
 
 ![java1](/img/java1.jpg)
 
-满减买了几本，经典之作，值得反复看，看完再入手卷2，实践书中代码：https://github.com/chuchinc/kl-book-resource
+满减买了几本，经典之作，值得反复看，看完再入手卷2，书中部分实践代码：[https://github.com/chuchinc/kl-book-resource](https://github.com/chuchinc/kl-book-resource)
