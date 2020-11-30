@@ -1014,7 +1014,7 @@ SELECT LTRIM('  MR') AS '去掉左空格', LTRIM('  BOOK') AS '去掉有右空�
 | []     | 表示指定范围，例如[A-F]，表示A到F范围内的任意字符串          |
 | [^]    | 表示任意范围之外的，例如   [^ A-F]，表示A到F范围之外的任意字符串 |
 
-### “%”通配符的使用
+### "%"通配符的使用
 
 ```mysql
 SELECT goods_id,goods_name,shop_price
