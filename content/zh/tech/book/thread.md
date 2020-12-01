@@ -7,7 +7,7 @@ tags: ["Java","并发编程"]
 
 ![thread](/img/thread.jpg)
 
-该书在微信读书中上架，可以免费阅读，配套代码：[https://github.com/chuchinc/kl-book-resource](https://github.com/chuchinc/kl-book-resource)
+该书在微信读书中上架，可以免费阅读，代码：[https://github.com/chuchinc/kl-book-resource](https://github.com/chuchinc/kl-book-resource)
 
 ## 并发编程线程基础
 
@@ -441,9 +441,198 @@ main over
 
 ### 等待线程执行终止的join方法
 
+在项目实战中经常遇到一个场景，就是需要等待某几件事情完成之后才能继续往下执行，比如多个线程全部加载完毕再汇总处理
+
+* join方法是Thread提供的
+* join是无参且返回值为void的方法
+
+```java
+public class JoinDemo {
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread threadA = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("ThreadA over");
+            }
+        });
+
+        Thread threadB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("ThreadB over");
+            }
+        });
+        //启动子线程
+        threadA.start();
+        threadB.start();
+        System.out.println("wait all child thread over");
+        //等待子线程执行完毕，返回
+        threadA.join();
+        threadB.join();
+        System.out.println("all child thread over");
+    }
+}
+
+
+wait all child thread over
+ThreadB over
+ThreadA over
+all child thread over
+```
+
 ### 让线程休眠的sleep方法
 
+Thread类中有一个静态的sleep方法，当一个执行中的线程调用了Thread的sleep方法后，调用线程会暂时让出指定时间的执行权，也就是在这期间不参与CPU的调度，但是该线程所拥有的监视器资源，比如锁还是持有不让出的。指定的睡眠时间到了后该函数会正常返回，线程就处于就绪状态，然后参与CPU的调度，获取到CPU资源后就可以继续运行了。如果在睡眠期间其他线程调用了该线程的interrupt（）方法中断了该线程，则该线程会在调用sleep方法的地方抛出InterruptedException异常而返回。
+
+线程在睡眠时拥有的监视器资源不会被释放
+
+```java
+public class SleepNotReleaseLock {
+    //创建一个独占锁
+    private static final Lock lock = new ReentrantLock();
+
+    public static void main(String[] args) {
+        Thread threadA = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //获取独占锁
+                lock.lock();
+                try {
+                    System.out.println("child threadA is in sleep");
+                    Thread.sleep(10000);
+                    System.out.println("child threadA is in awaked");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    lock.unlock();
+                }
+            }
+        });
+
+        Thread threadB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //获取独占锁
+                lock.lock();
+                try {
+                    System.out.println("child threadB is in sleep");
+                    Thread.sleep(10000);
+                    System.out.println("child threadB is in awaked");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    lock.unlock();
+                }
+            }
+        });
+        threadA.start();
+        threadB.start();
+    }
+}
+
+child threadA is in sleep
+child threadA is in awaked
+child threadB is in sleep
+child threadB is in awaked
+```
+
+如上代码首先创建了一个独占锁，然后创建了两个线程，每个线程在内部先获取锁，然后睡眠，睡眠结束后会释放锁。首先，无论你执行多少遍上面的代码都是线程A先输出或者线程B先输出，不会出现线程A和线程B交叉输出的情况。从执行结果来看，线程A先获取了锁，那么线程A会先输出一行，然后调用sleep方法让自己睡眠10s，在线程A睡眠的这10s内那个独占锁lock还是线程A自己持有，线程B会一直阻塞直到线程A醒来后执行unlock释放锁。
+
+下面再来看一下，当一个线程处于睡眠状态时，如果另外一个线程中断了它，会不会在调用sleep方法处抛出异常。
+
+```java
+public class SleepInterrupted {
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread threadA = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("child threadA is in sleep");
+                    Thread.sleep(10000);
+                    System.out.println("child threadA is in awaked");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        threadA.start();
+        Thread.sleep(2000);
+        //主线程中断子线程
+        threadA.interrupt();
+    }
+}
+```
+
+子线程在睡眠期间，主线程中断了它，所以子线程在调用sleep方法处抛出了InterruptedException异常。
+
 ### 让出CPU执行权的yield方法
+
+当一个线程调用yield方法时，当前线程会让出CPU使用权，然后处于就绪状态，线程调度器会从线程就绪队列里面获取一个线程优先级最高的线程，当然也有可能会调度到刚刚让出CPU的那个线程来获取CPU执行权。
+
+```java
+public class YieldTest implements Runnable{
+
+    public static void main(String[] args) {
+        new YieldTest();
+        new YieldTest();
+        new YieldTest();
+    }
+
+    public YieldTest() {
+        Thread thread = new Thread(this);
+        thread.start();
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 5; i++) {
+            //当i=0时让出CPU执行权，放弃时间片，进行下一轮调度
+            if ((i%5) == 0) {
+                System.out.println(Thread.currentThread() + "yield cpu...");
+                //当前线程让出CPU执行权，放弃时间片，进行下一轮调度
+//                        Thread.yield();
+            }
+        }
+        System.out.println(Thread.currentThread() + "is over");
+    }
+}
+
+Thread[Thread-0,5,main]yield cpu...
+Thread[Thread-0,5,main]is over
+Thread[Thread-1,5,main]yield cpu...
+Thread[Thread-1,5,main]is over
+Thread[Thread-2,5,main]yield cpu...
+Thread[Thread-2,5,main]is over
+```
+
+代码开启了三个线程，每个线程的功能都一样，都是在for循环中执行5次打印。解开Thread.yield（）注释再执行，结果如下：
+
+```java
+Thread[Thread-0,5,main]yield cpu...
+Thread[Thread-2,5,main]yield cpu...
+Thread[Thread-1,5,main]yield cpu...
+Thread[Thread-2,5,main]is over
+Thread[Thread-0,5,main]is over
+Thread[Thread-1,5,main]is over
+```
+
+从结果可知，Thread.yield（）方法生效了，三个线程分别在i=0时调用了Thread.yield（）方法，所以三个线程自己的两行输出没有在一起，因为输出了第一行后当前线程让出了CPU执行权。
+
+一般很少使用这个方法，在调试或者测试时这个方法或许可以帮助复现由于并发竞争条件导致的问题，其在设计并发控制时或许会有用途.
+
+总结：sleep与yield方法的区别在于，当线程调用sleep方法时调用线程会被阻塞挂起指定的时间，在这期间线程调度器不会去调度该线程。而调用yield方法时，线程只是让出自己剩余的时间片，并没有被阻塞挂起，而是处于就绪状态，线程调度器下一次调度时就有可能调度到当前线程执行。
 
 ### 线程中断
 

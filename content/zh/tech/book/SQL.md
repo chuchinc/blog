@@ -1080,5 +1080,164 @@ WHERE email LIKE '%/_%' ESCAPE '/';
 | 23       | \_xor@163.com   |
 | 40       | ab\_cd@sina.com |
 
+## 行数据过滤
 
+### 行查询
 
+#### 查询指定行
+
+```mysql
+SELECT goods_id,goods_name,shop_price FROM (SELECT TOP 6 * FROM goods) aa
+WHERE NOT EXISTS (SELECT * FROM (SELECT TOP 5 * FROM goods) bb WHERE aa.goods_id = bb.goods_id);
+```
+
+#### 随机查询一行数据
+
+##### 在SQL Server中随机查询一行数据
+
+```mysql
+SELECT TOP 1 goods_id,cat_id,goods_name
+FROM goods ORDER BY NEWID();
+```
+
+##### 在MySQL 中随机查询一行数据
+
+```mysql
+SELECT goods_id,cat_id,goods_name
+FROM goods
+ORDER BY RAND() LIMIT 1;
+```
+
+| goods\_id | cat\_id | goods\_name           |
+| :-------- | :------ | :-------------------- |
+| 39        | 191     | 华为 M2 10.0 平板电脑 |
+
+##### 在Oracle中随机查询一行数据
+
+```mysql
+SELECT "goods_id","cat_id","goods_name" FROM (
+SELECT "goods_id","cat_id","goods_name" FROM "goods" ORDER BY DBMS_RANDOM.VALUE()) 
+WHERE ROWNUM=1;
+```
+
+#### 在结果集中添加行号
+
+```mysql
+SELECT (SELECT COUNT(order_id) FROM orderform A
+WHERE A.order_id>=B.order_id) 编号,order_id,order_sn,total_amount
+FROM orderform B ORDER BY 1;
+```
+
+| 编号 | order\_id | order\_sn          | total\_amount |
+| :--- | :-------- | :----------------- | :------------ |
+| 1    | 836       | 201709271605249732 | 18000.00      |
+| 2    | 835       | 201709271519568300 | 48.00         |
+| 3    | 833       | 201706201658329117 | 1999.00       |
+| 4    | 832       | 201706191721157693 | 96.00         |
+| 5    | 831       | 201706191706011466 | 96.00         |
+| 6    | 830       | 201706191623342538 | 48.00         |
+| 7    | 829       | 201706090849505219 | 1399.00       |
+| 8    | 828       | 201706090846205237 | 1999.00       |
+| 9    | 827       | 201706081732158111 | 2000.00       |
+| 10   | 826       | 201706081729418431 | 399.00        |
+
+#### 查询隔行数据
+
+SQL Server
+
+```mysql
+SELECT 编号,ISBN,BookName,Writer FROM (
+SELECT ROW_NUMBER() OVER(ORDER BY ISBN) 编号,ISBN,BookName,Writer
+FROM bookinfo_zerobasis) a WHERE a.编号%2=1;
+```
+
+Oracle
+
+```
+SELECT 编号,ISBN,BookName,Writer FROM (
+SELECT ROW_NUMBER() OVER(ORDER BY ISBN) 编号,ISBN,BookName,Writer
+FROM bookinfo_zerobasis) a WHERE MOD(a.编号%2)=1;
+```
+
+MySQL不支持ROW_NUMBER() OVER() 函数
+
+#### 查询指定范围内所有行数据
+
+```mysql
+SELECT 编号,ISBN,BookName,Writer FROM (
+SELECT ROW_NUMBER() OVER(ORDER BY ISBN) 编号,ISBN,BookName,Writer
+FROM bookinfo_zerobasis) a WHERE a.编号 BETWEEN 3 AND 6;
+```
+
+| 编号 | ISBN          | BookName           | Writer   |
+| :--- | :------------ | :----------------- | :------- |
+| 3    | 7-110-12073-3 | 零基础学C语言      | 明日科技 |
+| 4    | 7-110-12073-4 | 零基础学PHP        | 明日科技 |
+| 5    | 7-110-12073-5 | 零基础学C#         | 明日科技 |
+| 6    | 7-110-12073-6 | 零基础学JavaScript | 明日科技 |
+
+### 空值（NULL）判断
+
+#### 查询空值（IS NULL）
+
+```MYSQL
+SELECT user_id, email, nickname
+FROM users
+WHERE nickname IS NULL;
+```
+
+| user\_id | email           | nickname |
+| :------- | :-------------- | :------- |
+| 2        | vip@dsads.com   | NULL     |
+| 5        | zuanshi@qqh.com | NULL     |
+
+#### 查询非空值（IS NOT NULL）
+
+```mysql
+SELECT user_id, email, nickname
+FROM users
+WHERE nickname IS NOT NULL;
+```
+
+| user\_id | email            | nickname   |
+| :------- | :--------------- | :--------- |
+| 1        | 240874144@qq.com | Andy       |
+| 13       | abc@sohu.com     | 支付宝用户 |
+| 14       | 3665696@qq.com   | 支付宝用户 |
+| 17       | 569696326@qq.com | 微信用户   |
+| 23       | \_xor@163.com    | QQ用户     |
+| 40       | ab\_cd@sina.com  | QQ用户     |
+
+#### 对空值进行处理
+
+```mysql
+SELECT BookName,Writer, IFNULL(newbook, 0) AS newbook
+FROM bookinfo_zerobasis;
+```
+
+| BookName           | Writer   | newbook |
+| :----------------- | :------- | :------ |
+| 零基础学Java       | 明日科技 | 1       |
+| 零基础学Android    | 明日科技 | 1       |
+| 零基础学C语言      | 明日科技 | 1       |
+| 零基础学PHP        | 明日科技 | 1       |
+| 零基础学C#         | 明日科技 | 1       |
+| 零基础学JavaScript | 明日科技 | 1       |
+| 零基础学HTML5+CSS3 | 明日科技 | 0       |
+| 零基础学Oracle     | 明日科技 | 0       |
+
+```mysql
+SELECT BookName,Writer, ISNULL(newbook) AS newbook
+FROM bookinfo_zerobasis;
+```
+
+| BookName           | Writer   | newbook |
+| :----------------- | :------- | :------ |
+| 零基础学Java       | 明日科技 | 0       |
+| 零基础学Android    | 明日科技 | 0       |
+| 零基础学C语言      | 明日科技 | 0       |
+| 零基础学PHP        | 明日科技 | 0       |
+| 零基础学C#         | 明日科技 | 0       |
+| 零基础学JavaScript | 明日科技 | 0       |
+| 零基础学HTML5+CSS3 | 明日科技 | 1       |
+| 零基础学Oracle     | 明日科技 | 1       |
