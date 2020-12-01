@@ -350,9 +350,122 @@ public final void wait(long timeout, int nanos) throws nterruptedException {
 
 #### notify()函数
 
-
+一个线程调用共享对象的notify()方法后，会唤醒一个在该共享变量上调用wait系列方法后被挂起的线程。一个共享变量上可能会有多个线程在等待，具体唤醒哪个等待线程是随机的。
 
 #### notifyAll函数
+
+notifyAll()方法会唤醒所有在该共享变量上由于被wait()方法而被挂起的线程
+
+下面举个例子来说明notify()和notifyAll()方法的具体含义及一些需要注意的地方
+
+```java
+public class NotifyAndNotifyAll {
+    //创建资源
+    private static volatile Object resourceA = new Object();
+
+    public static void main(String[] args) throws InterruptedException {
+        //创建线程
+        Thread threadA = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //获取resourceA共享的监视器锁
+                synchronized (resourceA) {
+                    try {
+                        System.out.println("ThreadA get resourceA lock");
+                        System.out.println("ThreadA begin wait");
+                        resourceA.wait();
+                        System.out.println("ThreadA end wait");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        Thread threadB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (resourceA) {
+                    try {
+                        System.out.println("ThreadB get resourceA lock");
+                        System.out.println("ThreadB begin wait");
+                        resourceA.wait();
+                        System.out.println("ThreadB end wait");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        Thread threadC = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (resourceA) {
+                    System.out.println("threadC begin notify");
+                    resourceA.notify();
+                }
+            }
+        });
+        //启动线程
+        threadA.start();
+        threadB.start();
+        Thread.sleep(1000);
+        threadC.start();
+        //等待线程结束
+        threadA.join();
+        threadB.join();
+        threadC.join();
+        System.out.println("main over");
+    }
+}
+
+ThreadA get resourceA lock
+ThreadA begin wait
+ThreadB get resourceA lock
+ThreadB begin wait
+threadC begin notify
+ThreadA end wait
+```
+
+把notify()改成notifyAll()后，输出结果变为：
+
+```java
+ThreadA get resourceA lock
+ThreadA begin wait
+ThreadB get resourceA lock
+ThreadB begin wait
+threadC begin notify
+ThreadB end wait
+ThreadA end wait
+main over
+```
+
+### 等待线程执行终止的join方法
+
+### 让线程休眠的sleep方法
+
+### 让出CPU执行权的yield方法
+
+### 线程中断
+
+### 理解线程上下文切换
+
+### 线程死锁
+
+#### 什么是线程死锁
+
+#### 如何避免线程死锁
+
+### 守护线程与用户线程
+
+### ThreadLocal
+
+#### ThreadLocal使用示例
+
+#### ThreadLocal不支持继承性
+
+#### InheritableThreadLocal类
+
+
 
 
 

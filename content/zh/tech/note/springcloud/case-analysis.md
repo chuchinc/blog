@@ -9,7 +9,7 @@ tags: ["Java","Spring Cloud"]
 
 ## 案例数据库环境准备
 
-本次课程数据库使用MySQL 5.7.X，数据库初始化：[SQL文件](/file/springcloud/springcloud.sql)
+数据库使用MySQL 5.7.X，数据库初始化：[SQL文件](/file/springcloud/springcloud.sql)
 
 ## 案例工程环境准备
 

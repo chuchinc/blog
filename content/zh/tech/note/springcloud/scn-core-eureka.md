@@ -5,9 +5,13 @@ draft: false
 tags: ["Java","Spring Cloud","Eureka"]
 ---
 
-## Eureka 服务注册中心
+*本文源代码下载：[spring-cloud-eureka.zip](/file/springcloud/spring-cloud-eureka.zip)*
 
 ## 关于注册中心
+
+对于任何一个
+
+**注意：服务注册中心本质上是为了解耦服务提供者和服务消费者。**
 
 ### 注册中心一般原理
 
@@ -261,11 +265,127 @@ tags: ["Java","Spring Cloud","Eureka"]
 
    点击请求，查看结果
 
-   截至当前的源代码下载，[spring-cloud-eureka.zip](/file/springcloud/spring-cloud-eureka.zip)
 
 ### Eureka 细节详解
 
 #### Eureka 元数据详解
 
-#### Eureka 客户端详解
+Eureka的元数据有两种：标准元数据和自定义元数据
 
+**标准元数据：** 
+
+**自定义元数据：**
+
+在程序中使用DiscoveryClient获取指定微服务的所有元数据
+
+```java
+@SpringBootTest(classes = {AutoDeliverApplication8090.class})
+@RunWith(SpringJUnit4ClassRunner.class)
+public class MetaDataTest {
+
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
+    @Test
+    public void test() {
+        //获取服务实例
+        List<ServiceInstance> instances = discoveryClient.getInstances("service-resume");
+        //打印元数据信息
+        for (ServiceInstance instance : instances) {
+            System.out.println(instance.toString());
+        }
+    }
+
+}
+```
+
+debug查看获取到的实例对象，查看元数据
+
+#### Eureka 客户端
+
+服务提供者（也就是Eureka客户端）要向EurekaServer注册服务，并完成服务续约等工作
+
+##### 服务注册（服务提供者）
+
+1. 当我们导入了eureka-client依赖坐标，配置Eureka服务注册中心地址
+2. 服务在启动时会向注册中心发起注册请求，携带服务元数据信息
+3. Eureka注册中心会把服务的信息保存在Map中
+
+##### 服务续约（服务消费者）
+
+服务每隔30秒会向注册中心续约（心跳）一次，如果没有续约，租约在90秒后到期，然后服务会被失效。每隔30秒的续约操作叫做心跳检测
+
+往往不需要我们调整这两个配置：
+
+```xml
+#向Eureka服务中心集群注册服务
+eureka:
+	instance:
+		#服务续约间隔时间，默认30秒
+		lease-renewal-interval-in-seconds: 30
+		#租约到期，服务失效时间，默认90秒，服务超过90秒没有发送心跳，EurekaServer会将服务从列表移除
+		lease-expiration-duration-in-seconds: 90
+```
+
+##### 获取服务列表（服务消费者）
+
+每隔30秒服务会从注册中心拉取一份服务列表，这个时间可以通过配置修改。往往不需要我们调整
+
+```java
+#向Eureka服务中心集群注册服务
+eureka:
+	client:
+		#每隔多少秒拉取一次服务列表
+		registry-fetch-interval-seconds: 30
+```
+
+1. 服务消费者启动时，从EurekaServer服务列表获取只读备份数据，缓存到本地
+2. 每隔30秒，会重新获取并更新数据
+3. 每隔30秒的时间可以通过配置修改
+
+#### Eureka服务端
+
+##### 服务下线
+
+1. 当服务正常关闭操作时，会发送服务下线的REST请求给EurekaServer
+2. 服务中心接受到请求后，会将该服务置为下线状态
+
+##### 失效剔除
+
+Eureka Server会定时（间隔值是eureka.server.eviction-interval-timer-in-ms，默认60s）进⾏检查， 如果发现实例在在⼀定时间（此值由客户端设置的eureka.instance.lease-expiration-duration-inseconds定义，默认值为90s）内没有收到⼼跳，则会注销此实例
+
+##### 自我保护
+
+服务提供者 —> 注册中⼼
+定期的续约（服务提供者和注册中⼼通信），假如服务提供者和注册中⼼之间的⽹络有点问题，不代表 服务提供者不可⽤，不代表服务消费者⽆法访问服务提供者
+
+如果在15分钟内超过85%的客户端节点都没有正常的⼼跳，那么Eureka就认为客户端与注册中⼼出现了 ⽹络故障，Eureka Server⾃动进⼊⾃我保护机制。
+
+官方对自我保护机制的定义是：
+
+```
+自我保护模式正是一种针对网络异常波动的安全保护措施，使用自我保护模式能使Eureka集群更加的健壮、稳定的运行。
+```
+
+**为什么会有⾃我保护机制？**
+
+默认情况下，如果Eureka Server在⼀定时间内（默认90秒）没有接收到某个微服务实例的⼼跳， Eureka Server将会移除该实例。但是当⽹络分区故障发⽣时，微服务与Eureka Server之间⽆法正常通 信，⽽微服务本身是正常运⾏的，此时不应该移除这个微服务，所以引⼊了⾃我保护机制。
+
+服务中⼼⻚⾯会显示如下提示信息:
+
+```
+EMERGENCY! EUREKA MAY BE INCORRECTLY CLAIMING INSTANCES ARE UP WHEN THEY’RE NOT. RENEWALS ARE LESSER THAN THRESHOLD AND HENCE THE INSTANCES ARE NOT BEING EXPIRED JUST TO BE SAFE.
+```
+
+**当处于自我保护模式时**
+
+1. 不会剔除任何服务实例（可能是服务提供者和EurekaServer之间的网络问题），保证了大多数服务依然可用
+
+2. Eureka Server工程中通过Server⼯程中通过eureka.server.enable-self-preservation配置可⽤关停⾃我保护，默认 值是打开
+
+   ```xml
+   eureka: server:
+   enable-self-preservation: false # 关闭⾃我保护模式（缺省为打开）
+   ```
+
+   建议在生产环境打开自我保护机制
