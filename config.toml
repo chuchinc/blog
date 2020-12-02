@@ -399,7 +399,7 @@ uglyURLs = false
     # 最大字号
     largestFontSize = 2.5
     # 最小字号
-    smallestFontSize = 1
+    smallestFontSize = 0.2
 
 
     ######################################
@@ -744,7 +744,7 @@ uglyURLs = false
     readingTimeIcon = "clock"
 
     # 是否显示不蒜子页面浏览量
-    displayBusuanziPagePV = true
+    displayBusuanziPagePV = false
     # 不蒜子页面浏览量的图标
     busuanziPagePVIcon = "eye"
     # 说明：仅在生产环境（production）下渲染
