@@ -17,23 +17,23 @@ tags: ["Java","Spring Cloud","Hystrix"]
 
 1. 消费者工程中引入Hystrix依赖：
 
-   ```xml
-   <!--    熔断器Hystrix-->
-       <dependency>
-         <groupId>org.springframework.cloud</groupId>
-         <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
-       </dependency>
-   ```
+```xml
+<!--    熔断器Hystrix-->
+   <dependency>
+     <groupId>org.springframework.cloud</groupId>
+     <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+   </dependency>
+```
 
 2. 消费者工程启动类中添加熔断器开启注解
 
-   ```java
-   @EnableCircuitBreaker //开启熔断
-   ```
+```java
+@EnableCircuitBreaker //开启熔断
+```
 
 3. 定义服务降级处理⽅法，并在业务⽅法上使⽤@HystrixCommand的fallbackMethod属性关联到 服务降级处理⽅法
 
-   ```java
+```java
        /**
         * 提供者模拟处理超时，调用方法添加Hystrix控制
         * @param userId
@@ -100,7 +100,7 @@ tags: ["Java","Spring Cloud","Hystrix"]
        public Integer myFallBack(Long userId) {
            return -123333; // 兜底数据
        }
-   ```
+```
 
    注意：降级（兜底）方法必须和被降级方法相同的方法签名（相同参数列表，相同返回值），可以在类上使用@DefaultProperties注解统一指定整个类中公用的降级（兜底）方法
 
@@ -120,7 +120,7 @@ tags: ["Java","Spring Cloud","Hystrix"]
 
 4. 服务提供者模拟请求超时（线程休眠3s），只修改8080实例，8081不修改，对比观察
 
-   ```java
+```java
    @RestController
    @RequestMapping("/resume")
    public class ResumeController {
@@ -140,7 +140,7 @@ tags: ["Java","Spring Cloud","Hystrix"]
            return resume.getIsOpenResume();
        }
    }
-   ```
+```
 
     因为我们已经使⽤了Ribbon负载（轮询），所以我们在请求的时候，⼀次熔断降级，⼀次正常返 回
 
@@ -291,7 +291,7 @@ management:
 
 1. 新建一个监控服务工程cloud-hystrix-dashboard-9000，导入依赖坐标
 
-   ```xml
+```xml
    <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
@@ -304,11 +304,11 @@ management:
        <groupId>org.springframework.cloud</groupId>
        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
    </dependency>
-   ```
+```
 
 2. 启动类添加@EnableHystrixDashboard激活仪表盘
 
-   ```java
+```java
    @SpringBootApplication
    @EnableHystrixDashboard
    public class HystrixDashboardApplication9000 {
@@ -317,11 +317,11 @@ management:
            SpringApplication.run(HystrixDashboardApplication9000.class, args);
        }
    }
-   ```
+```
 
 3. application.yml
 
-   ```xml
+```xml
    server:
      port: 9000
    spring:
@@ -337,11 +337,11 @@ management:
        prefer-ip-address: true
        #⾃定义实例显示格式，加上版本号，便于多版本管理，注意是ip-address，早期版本是ipAddress
        instance-id: ${spring.cloud.client.ipaddress}:${spring.application.name}:${server.port}:@project.version@
-   ```
+```
 
 4. 在被监测的微服务中注册监控servlet（⾃动投递微服务，监控数据就是来⾃于这个微服务）
 
-   ```java
+```java
    /**
         * 在被监控的微服务中注册一个serlvet，后期我们就是通过访问这个servlet来获取该服务的Hystrix监控数据的
         * 前提：被监控的微服务需要引入springboot的actuator功能
@@ -356,7 +356,7 @@ management:
            registrationBean.setName("HystrixMetricsStreamServlet");
            return registrationBean;
        }
-   ```
+```
 
    被监控微服务发布之后，可以直接访问监控servlet，但是得到的数据并不直观，后期可以结合仪表盘更 友好的展示
 
@@ -384,7 +384,7 @@ management:
 
 1. 新建项目cloud-hystrix-turbine-9001，引入依赖坐标
 
-   ```xml
+```xml
    <dependencies>
        <!--hystrix turbine聚合监控-->
        <dependency>
@@ -403,11 +403,11 @@ management:
          <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
        </dependency>
      </dependencies>
-   ```
+```
 
 2. 将需要进行Hystrix监控的多个微服务配置起来，在工程application.yml中开启Turbine及进⾏相关配置
 
-   ```xml
+```xml
    server:
      port: 9001
    spring:
@@ -429,11 +429,11 @@ management:
      appConfig: service-autodeliver
      # 集群默认名称
      clusterNameExpression: "'default'"
-   ```
+```
 
 3. 在当前项⽬启动类上添加注解@EnableTurbine，开启仪表盘以及Turbine聚合
 
-   ```java
+```java
    @SpringBootApplication
    @EnableDiscoveryClient
    @EnableTurbine //开启聚合功能
@@ -443,7 +443,7 @@ management:
            SpringApplication.run(HystrixTurbineApplication9001.class, args);
        }
    }
-   ```
+```
 
 4. 浏览器访问Turbine项目: [localhost:9001/turbine.stream](http://localhost:9001/turbine.stream)，就可以看到监控数据，通过dashboard的⻚⾯查看数据更直观，把刚才的地址输⼊[Hystrix Dashboard](http://localhost:9000/hystrix/) 的地址栏
 
