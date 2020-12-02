@@ -636,7 +636,171 @@ Thread[Thread-1,5,main]is over
 
 ### 线程中断
 
+Java中的线程中断是一种线程间的协作模式，通过设置线程的中断标志并不能直接终止该线程的执行，而是被中断的线程根据中断状态自行处理。
+
+* void interrupt（） 如果线程A因为调用了wait系列函数、join方法或者sleep方法而被阻塞挂起，这时候若线程B调用线程A的interrupt（）方法，线程A会在调用这些方法的地方抛出InterruptedException异常而返回。
+* boolean isInterrupted（）检测当前线程是否被中断，如果是返回true，否则返回false。
+* boolean interrupted（）检测当前线程是否被中断，如果是返回true，否则返回false。与isInterrupted不同的是，该方法如果发现当前线程被中断，则会清除中断标志，并且该方法是static方法，可以通过Thread类直接调用
+
+线程使用Interrupted优雅退出的经典例子:
+
+```java
+@Override
+public void run() {
+    try {
+        //线程退出的条件
+         while(! Thread.currentThread().isInterrupted() && more work to do) {
+                  Thread.sleep(1000);
+                //do more work
+           }
+         }catch (InterruptedException e) {
+           e.printStackTrace();
+           } finally {
+                    //cleanup,if required
+           
+}
+```
+
+根据中断标志判断线程是否终止的例子:
+
+```java
+public class InterruptedJudge {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //如果当前线程被中断则退出循环
+                while (! Thread.currentThread().isInterrupted()) {
+                    System.out.println(Thread.currentThread() + "hello");
+                }
+            }
+        });
+        thread.start();
+        Thread.sleep(1000);
+        System.out.println("main thread interrupt thread");
+        thread.interrupt();
+        thread.join();
+        System.out.println("main is over");
+    }
+}
+
+
+
+Thread[Thread-0,5,main]hello
+main thread interrupt thread
+Thread[Thread-0,5,main]hello
+Thread[Thread-0,5,main]hello
+Thread[Thread-0,5,main]hello
+Thread[Thread-0,5,main]hello
+main is over
+```
+
+打断休眠
+
+```java
+public class InterruptedSleep {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("begin sleep");
+                    Thread.sleep(2000000000);
+                    System.out.println("awake");
+                } catch (InterruptedException e) {
+                    System.out.println("thread is interrupted while sleep");
+                    return;
+                }
+                System.out.println("thread-leaving normally");
+            }
+        });
+        thread.start();
+        Thread.sleep(1000);
+        thread.interrupt();
+        thread.join();
+        System.out.println("main is over");
+    }
+}
+
+
+begin sleep
+thread is interrupted while sleep
+main is over
+```
+
+interrupted（）与isInterrupted（）方法的不同之处：
+
+```java
+public class InterruptedAndIsInterrupted {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (; ; ) {
+
+                }
+            }
+        });
+        //启动线程
+        thread.start();
+        //设置中断标志
+        thread.interrupt();
+        //获取中断标志
+        System.out.println("isInterrupted:" + thread.isInterrupted());
+        //获取中断标志并重置
+        System.out.println("isInterrupted:" + thread.interrupted());
+        //获取中断标志并重置
+        System.out.println("isInterrupted:" + Thread.interrupted());
+        //获取中断标志
+        System.out.println("isInterrupted:" + thread.isInterrupted());
+        thread.join();
+        System.out.println("main thread is over");
+    }
+}
+
+isInterrupted:true
+isInterrupted:false
+isInterrupted:false
+isInterrupted:true
+```
+
+这里虽然调用了threadOne的interrupted（）方法，但是获取的是主线程的中断标志，因为主线程是当前线程。threadOne.interrupted（）和Thread.interrupted（）方法的作用是一样的，目的都是获取当前线程的中断标志。修改上面的例子为如下：
+
+```java
+public class InterruptedRemove {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //中断标志为true时会退出循环，并且清除中断标志
+                while (!Thread.currentThread().isInterrupted()){
+
+                }
+                System.out.println("thread is interrupted :" + Thread.currentThread().isInterrupted());
+            }
+        });
+        //启动线程
+        thread.start();
+        //设置中断标志
+        thread.interrupt();
+        thread.join();
+        System.out.println("main thread is over");
+    }
+}
+
+thread is interrupted :true
+main thread is over
+```
+
+由输出结果可知，调用interrupted（）方法后中断标志被清除了
+
 ### 理解线程上下文切换
+
+在多线程编程中，线程个数一般都大于CPU个数，而每个CPU同一时刻只能被一个线程使用，为了让用户感觉多个线程是在同时执行的，CPU资源的分配采用了时间片轮转的策略，也就是给每个线程分配一个时间片，线程在时间片内占用CPU执行任务。**当前线程使用完时间片后，就会处于就绪状态并让出CPU让其他线程占用**，这就是上下文切换。
+
+从当前线程的上下文切换到了其他线程。那么就有一个问题，让出CPU的线程等下次轮到自己占有CPU时如何知道自己之前运行到哪里了？所以在切换线程上下文时需要保存当前线程的执行现场，当再次执行时根据保存的执行现场信息恢复执行现场。
+
+线程上下文切换时机有：当前线程的CPU时间片使用完处于就绪状态时，当前线程被其他线程中断时。
 
 ### 线程死锁
 
