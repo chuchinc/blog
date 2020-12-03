@@ -1,5 +1,5 @@
 ---
-title: "《Java并发编程之美》"
+title: "Java并发编程之美"
 date: 2020-11-29T16:07:26+08:00
 draft: false
 tags: ["Java","并发编程"]

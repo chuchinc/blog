@@ -1,5 +1,5 @@
 ---
-title: "《SQL即查即用》"
+title: "SQL即查即用"
 date: 2019-11-05T16:28:34+08:00
 draft: false
 tags: ["SQL"]                       
