@@ -806,9 +806,171 @@ main thread is over
 
 #### 什么是线程死锁
 
+死锁是指两个或两个以上的线程在执行过程中，因争夺资源而造成的互相等待的现象，在无外力作用的情况下，这些线程会一直相互等待而无法继续运行下去
+
+死锁的产生必须具备以下四个条件：
+
+* **互斥条件**：指线程对已经获取到的资源进行排它性使用，即该资源同时只由一个线程占用。如果此时还有其他线程请求获取该资源，则请求者只能等待，直至占有资源的线程释放该资源。
+* **请求并持有条件**：指一个线程已经持有了至少一个资源，但又提出了新的资源请求，而新资源已被其他线程占有，所以当前线程会被阻塞，但阻塞的同时并不释放自己已经获取的资源。
+* **不可剥夺条件**：指线程获取到的资源在自己使用完之前不能被其他线程抢占，只有在自己使用完毕后才由自己释放该资源。
+* **环路等待条件**：指在发生死锁时，必然存在一个线程—资源的环形链，即线程集合{T0, T1, T2,…, Tn}中的T0正在等待一个T1占用的资源，T1正在等待T2占用的资源，……Tn正在等待已被T0占用的资源。
+
+通过一个例子来说明线程死锁：
+
+```java
+public class Deadlock {
+    //创建资源
+    private static Object resourceA = new Object();
+    private static Object resourceB = new Object();
+
+    public static void main(String[] args) {
+        Thread threadA = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (resourceA) {
+                    System.out.println(Thread.currentThread() + "get resourceA");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(Thread.currentThread() + "waiting for resourceB");
+                    synchronized (resourceB) {
+                        System.out.println(Thread.currentThread() + "get resourceB");
+                    }
+                }
+            }
+        });
+
+        Thread threadB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (resourceB) {
+                    System.out.println(Thread.currentThread() + "get resourceB");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(Thread.currentThread() + "waiting for resourceA");
+                    synchronized (resourceA) {
+                        System.out.println(Thread.currentThread() + "get resourceA");
+                    }
+                }
+            }
+        });
+        threadA.start();
+        threadB.start();
+    }
+}
+
+
+Thread[Thread-0,5,main]get resourceA
+Thread[Thread-1,5,main]get resourceB
+Thread[Thread-1,5,main]waiting for resourceA
+Thread[Thread-0,5,main]waiting for resourceB
+```
+
+本例是如何满足死锁的四个条件的：
+
+首先，resourceA和resourceB都是互斥资源，当线程A调用synchronized（resourceA）方法获取到resourceA上的监视器锁并释放前，线程B再调用synchronized（resourceA）方法尝试获取该资源会被阻塞，只有线程A主动释放该锁，线程B才能获得，这满足了资源互斥条件。线程A首先通过synchronized（resourceA）方法获取到resourceA上的监视器锁资源，然后通过synchronized（resourceB）方法等待获取resourceB上的监视器锁资源，这就构成了请求并持有条件。线程A在获取resourceA上的监视器锁资源后，该资源不会被线程B掠夺走，只有线程A自己主动释放resourceA资源时，它才会放弃对该资源的持有权，这构成了资源的不可剥夺条件。线程A持有objectA资源并等待获取objectB资源，而线程B持有objectB资源并等待objectA资源，这构成了环路等待条件。所以线程A和线程B就进入了死锁状态。
+
 #### 如何避免线程死锁
 
+要想避免死锁，只需要破坏掉至少一个构造死锁的必要条件即可，但是学过操作系统的读者应该都知道，目前只有请求并持有和环路等待条件是可以被破坏的。
+
+造成死锁的原因其实和申请资源的顺序有很大关系，使用资源申请的有序性原则就可以避免死锁，那么什么是资源申请的有序性呢？我们对上面线程B的代码进行如下修改。
+
+```java
+Thread threadB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (resourceA) {
+                    System.out.println(Thread.currentThread() + "get resourceA");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(Thread.currentThread() + "waiting for resourceB");
+                    synchronized (resourceB) {
+                        System.out.println(Thread.currentThread() + "get resourceB");
+                    }
+                }
+            }
+        });
+
+Thread[Thread-0,5,main]get resourceA
+Thread[Thread-0,5,main]waiting for resourceB
+Thread[Thread-0,5,main]get resourceB
+Thread[Thread-1,5,main]get resourceA
+Thread[Thread-1,5,main]waiting for resourceB
+Thread[Thread-1,5,main]get resourceB
+```
+
+如上代码让在线程B中获取资源的顺序和在线程A中获取资源的顺序保持一致，其实资源分配有序性就是指，假如线程A和线程B都需要资源1,2,3, ..., n时，对资源进行排序，线程A和线程B只有在获取了资源n-1时才能去获取资源n。
+
+我们可以简单分析一下为何资源的有序分配会避免死锁，比如上面的代码，假如线程A和线程B同时执行到了synchronized（resourceA），只有一个线程可以获取到resourceA上的监视器锁，假如线程A获取到了，那么线程B就会被阻塞而不会再去获取资源B，线程A获取到resourceA的监视器锁后会去申请resourceB的监视器锁资源，这时候线程A是可以获取到的，线程A获取到resourceB资源并使用后会放弃对资源resourceB的持有，然后再释放对resourceA的持有，释放resourceA后线程B才会被从阻塞状态变为激活状态。所以资源的有序性破坏了资源的请求并持有条件和环路等待条件，因此避免了死锁。
+
 ### 守护线程与用户线程
+
+Java中的线程分为两类，分别为daemon线程（守护线程）和user线程（用户线程）。在JVM启动时会调用main函数，main函数所在的线程就是一个用户线程，其实在JVM内部同时还启动了好多守护线程，比如垃圾回收线程。
+
+那么守护线程和用户线程有什么区别呢？区别之一是当最后一个非守护线程结束时，JVM会正常退出，而不管当前是否有守护线程，也就是说守护线程是否结束并不影响JVM的退出。言外之意，只要有一个用户线程还没结束，正常情况下JVM就不会退出。
+
+创建守护线程：
+
+```java
+public class DaemonThread {
+    public static void main(String[] args) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
+        //设置为守护线程
+        thread.setDaemon(true);
+        thread.start();
+    }
+}
+```
+
+用户线程与守护线程的区别：
+
+```java
+public class DaemonAndUserThread {
+    public static void main(String[] args) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (;;) {}
+            }
+        });
+        //启动子线程
+        thread.start();
+        System.out.println("main thread is over ");
+    }
+}
+```
+
+如上代码在main线程中创建了一个thread线程，在thread线程里面是一个无限循环。从运行代码的结果看，main线程已经运行结束了，那么JVM进程已经退出了吗？在IDE的输出结果右上侧的红色方块说明，JVM进程并没有退出。
+
+这个结果说明了当父线程结束后，子线程还是可以继续存在的，也就是子线程的生命周期并不受父线程的影响。
+
+把上面的thread线程设置为守护线程后：
+
+```java
+thread.setDaemon(true);
+thread.start();
+
+main thread is over
+```
+
+在这个例子中，main函数是唯一的用户线程，thread线程是守护线程，当main线程运行结束后，JVM发现当前已经没有用户线程了，就会终止JVM进程。由于这里的守护线程执行的任务是一个死循环，这也说明了如果当前进程中不存在用户线程，但是还存在正在执行任务的守护线程，则JVM不等守护线程运行完毕就会结束JVM进程。
+
+main线程运行结束后，JVM会自动启动一个叫作DestroyJavaVM的线程，该线程会等待所有用户线程结束后终止JVM进程。
+
+总结：**如果你希望在主线程结束后JVM进程马上结束，那么在创建线程时可以将其设置为守护线程，如果你希望在主线程结束后子线程继续工作，等子线程结束后再让JVM进程结束，那么就将子线程设置为用户线程。
 
 ### ThreadLocal
 
