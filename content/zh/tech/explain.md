@@ -1,21 +1,23 @@
 ---
-title: "更新计划"
-date: 2020-09-01T16:26:24+08:00
+title: "分区说明"
+date: 2000-01-01T16:26:24+08:00
 draft: false
 tags: []
 ---
 
-## 主线
+## 书记
 
-### 书记
+**<center>实体书在书上标注</center>**
 
 - [ ] 《SQL即查即用》
 - [x] 《Java核心技术 卷1 原书11版》
 - [ ] 《Java并发编程之美》
 
-### 笔记
+## 笔记
 
-#### Spring Cloud系列
+**<center>内容都经过实践，源码仅供参考，欢迎勘误</center>**
+
+**Spring Cloud系列**
 
 - [x] 微服务架构介绍
 - [x] Spring Cloud 综述
@@ -38,9 +40,9 @@ tags: []
   - [ ] Sentinel 流量卫兵
   - [ ] Nacos + Sentinel + Dubbo
 
-#### 存储技术
+**存储技术**
 
-##### MySQL 系列
+**MySQL 系列**
 
 - [ ] MySQL 简介
 
@@ -51,7 +53,7 @@ tags: []
 - [ ] 分库分表及中间件
 - [ ] 运维和第三方工具 
 
-##### MongoDB系列
+**MongoDB系列**
 
 - [ ] MongoDB体系结构
 - [ ] MongoDB命令
@@ -61,7 +63,7 @@ tags: []
 - [ ] MongoDB集群高可用
 - [ ] MongoDB安全认证
 
-##### Neo4J
+**Neo4J**
 
 - [ ] 图和Neo4j
 - [ ] Neo4j CQL
@@ -69,41 +71,41 @@ tags: []
 - [ ] Neo4j Admin管理员操作
 - [ ] Neo4j 程序访问
 
-##### OSS云存储
+**OSS云存储**
 
 - [ ] 阿里云OSS
 
-##### FastDFS
+**FastDFS**
 
 - [ ] FastDFS
 
-#### 缓存技术
+**缓存技术**
 
-##### Redis
+- [ ] Redis
 
-##### Guava Cache
+- [ ] Guava Cache
 
-##### EV Cache
+- [ ] EV Cache
 
-##### Tair
+- [ ] Tair
 
-##### Aerospike
+- [ ] Aerospike
 
-#### 消息服务中间件
+**消息服务中间件**
 
-##### RabbitMQ
+- [ ] RabbitMQ
 
-##### Kafka
+- [ ] Kafka
 
-#### 分布式搜索引擎
+**分布式搜索引擎**
 
-##### Lucene
+- [ ] Lucene
 
-##### Solr
+- [ ] Solr
 
-##### Elastic Stack
+- [ ] Elastic Stack
 
-## 不定时填坑
+**不定期**
 
 - [ ] Tomcat
 - [ ] Nginx
@@ -124,3 +126,8 @@ tags: []
 - [ ] SpringMVC
 - [ ] Spring Data JPA
 - [ ] Springboot
+
+## 转载
+
+**<center>记录参考过的有用博文</center>**
+
