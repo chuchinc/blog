@@ -974,13 +974,268 @@ main线程运行结束后，JVM会自动启动一个叫作DestroyJavaVM的线程
 
 ### ThreadLocal
 
+多线程访问同一个共享变量时特别容易出现并发问题，特别是在多个线程需要对一个共享变量进行写入时。
+
+![49e1896d0e49c1f6530551cf1134e66.png](https://i.loli.net/2020/12/07/Npsd1M6cKDAa8H9.png)
+
+ThreadLocal是JDK包提供的，它提供了线程本地变量，也就是如果你创建了一个ThreadLocal变量，那么访问这个变量的每个线程都会有这个变量的一个本地副本。当多个线程操作这个变量时，实际操作的是自己本地内存里面的变量，从而避免了线程安全问题。创建一个ThreadLocal变量后，每个线程都会复制一个变量到自己的本地内存。
+
+![f8244f14cc03d8195499a355b6c10cb.png](https://i.loli.net/2020/12/07/8SKRXgk5sIruiQE.png)
+
 #### ThreadLocal使用示例
+
+```java
+public class ThreadLocalTest {
+
+    //创建thradlocal变量
+    static ThreadLocal<String> localVariable = new ThreadLocal<>();
+
+    /**
+     * print函数
+     * @param string
+     */
+    static void print(String string) {
+        //打印当前线程本地内存中localVariable变量的值
+        System.out.println(string + ":" + localVariable.get());
+        //清除当前线程本地内存中的localVariable变量
+        localVariable.remove();
+    }
+
+    public static void main(String[] args) {
+        Thread threadOne = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                localVariable.set("threadOne local variable");
+                print("threadOne");
+                System.out.println("threadOne remove after" + ":" + localVariable.get());
+            }
+        });
+
+        Thread threadTwo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                localVariable.set("threadTwo local variable");
+                print("threadTwo");
+                System.out.println("threadTwo remove after" + ":" + localVariable.get());
+            }
+        });
+
+        threadOne.start();
+        threadTwo.start();
+    }
+}
+
+
+threadTwo:threadTwo local variable
+threadOne:threadOne local variable
+threadTwo remove after:threadTwo local variable
+threadOne remove after:threadOne local variable
+```
+
+线程One中的代码3.1通过set方法设置了localVariable的值，这其实设置的是线程One本地内存中的一个副本，这个副本线程Two是访问不了的。然后代码3.2调用了print函数，代码1.1通过get函数获取了当前线程（线程One）本地内存中localVariable的值。
+
+打开代码1.2的注释后，再次运行，运行结果如下
+
+```java
+threadOne:threadOne local variable
+threadTwo:threadTwo local variable
+threadOne remove after:null
+threadTwo remove after:null
+```
+
+#### ThreadLocal的实现原理
+
+ThreadLocal相关类的类图结构：
+
+![80e10bd9080e1a8a2f8c4af3ccd8cae.png](https://i.loli.net/2020/12/07/1mZ8CThncvf3zHA.png)
+
+Thread类中有一个threadLocals和一个inheritableThreadLocals，它们都是ThreadLocalMap类型的变量，而ThreadLocalMap是一个定制化的Hashmap。在默认情况下，每个线程中的这两个变量都为null，只有当前线程第一次调用ThreadLocal的set或者get方法时才会创建它们。其实每个线程的本地变量不是存放在ThreadLocal实例里面，而是存放在调用线程的threadLocals变量里面。也就是说，**ThreadLocal类型的本地变量存放在具体的线程内存空间中。ThreadLocal就是一个工具壳，它通过set方法把value值放入调用线程的threadLocals里面并存放起来，当调用线程调用它的get方法时，再从当前线程的threadLocals变量里面将其拿出来使用。如果调用线程一直不终止，那么这个本地变量会一直存放在调用线程的threadLocals变量里面**，所以当不需要使用本地变量时可以通过调用ThreadLocal变量的remove方法，从当前线程的threadLocals里面删除该本地变量。另外，Thread里面的threadLocals为何被设计为map结构？很明显是因为每个线程可以关联多个ThreadLocal变量。、
+
+1. **void set(T value)**
+
+```java
+public void set(T value) {
+    //(1)获取当前线程
+    Thread t = Thread.currentThread();
+    //(2)将当前线程作为key，去查找对应的线程变量，找到则设置
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this,value);
+    else
+    //(3)第一次调用就创建当前线程对应的HashMap
+        createMap(t, value);
+}
+```
+
+代码（1）首先获取调用线程，然后使用当前线程作为参数调用getMap（t）方法，getMap（Thread t）的代码如下。
+
+```java
+ThreadLocalMap getMap(Thread t) {
+    return t.threadLocals;
+}
+```
+
+可以看到，getMap（t）的作用是获取线程自己的变量threadLocals,threadlocal变量被绑定到了线程的成员变量上。如果getMap（t）的返回值不为空，则把value值设置到threadLocals中，也就是把当前变量值放入当前线程的内存变量threadLocals中。threadLocals是一个HashMap结构，其中key就是当前ThreadLocal的实例对象引用，value是通过set方法传递的值。如果getMap（t）返回空值则说明是第一次调用set方法，这时创建当前线程的threadLocals变量。下面来看createMap（t, value）做什么。
+
+```java
+void createMap(Thread t, T firstValue) {
+    th.threadLocals = new ThreadLocalMap(this, firstValue);
+}
+```
+
+它创建当前线程的threadLocals变量。
+
+2. **T get( )**
+
+```java
+public T get() {
+    //(4)获取当前线程
+    Thread t = Thread.currentThread();
+    //(5)获取当前线程的threadLocals变量
+    ThreadLocalMap map = getMap(t);
+    //(6)如果threadLocals不为null,则返回对应本地变量的值
+    if (e != null) {
+        @SuppressWarnings("unchecked")
+        T result = (T)e.value;
+        return result;
+    }
+    //(7)threadLocals为空则初始化当前线程的threadLocals成员变量
+    return setInitialValue();
+}
+```
+
+代码（4）首先获取当前线程实例，如果当前线程的threadLocals变量不为null，则直接返回当前线程绑定的本地变量，否则执行代码（7）进行初始化。setInitialValue（）的代码如下。
+
+```java
+ private T setInitialValue() {
+     //(8)初始化为null
+        T value = initialValue();
+        Thread t = Thread.currentThread();
+        ThreadLocalMap map = getMap(t);
+     //(9)如果当前线程的threadLocals变量不为空
+        if (map != null)
+            map.set(this, value);
+        else
+            //(10)如果当前线程的threadLocals变量不为空
+            createMap(t, value);
+        return value;
+    }
+```
+
+如果当前线程的threadLocals变量不为空，则设置当前线程的本地变量值为null，否则调用createMap方法创建当前线程的createMap变量。
+
+3. **void remove( )**
+
+```java
+public void remove() {
+         ThreadLocalMap m = getMap(Thread.currentThread());
+         if (m != null)
+             m.remove(this);
+}
+```
+
+如以上代码所示，如果当前线程的threadLocals变量不为空，则删除当前线程中指定ThreadLocal实例的本地变量。
+
+**总结**：在每个线程内部都有一个名为threadLocals的成员变量，该变量的类型为HashMap，其中key为我们定义的ThreadLocal变量的this引用，value则为我们使用set方法设置的值。每个线程的本地变量存放在线程自己的内存变量threadLocals中，如果当前线程一直不消亡，那么这些本地变量会一直存在，所以可能会造成内存溢出，因此使用完毕后要记得调用ThreadLocal的remove方法删除对应线程的threadLocals中的本地变量。
+
+![ee4d289f28aafbea0fc747060d07f79.png](https://i.loli.net/2020/12/07/n3HYiUS1ftgWE4N.png)
 
 #### ThreadLocal不支持继承性
 
+```java
+public class ThreadLocalExtendsTest {
+    //（1）创建线程变量
+    public static ThreadLocal<String> threadLocal = new ThreadLocal<String>();
+
+    public static void main(String[] args) {
+        //（2）设置线程变量
+        threadLocal.set("hello world");
+        //(3)启动子线程
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //(4)子线程输出线程变量的值
+                System.out.println("thread:" + threadLocal.get());
+            }
+        });
+        thread.start();
+        System.out.println("main:" + threadLocal.get());
+    }
+}
+
+
+main:hello world
+thread:null
+```
+
+也就是说，同一个ThreadLocal变量在父线程中被设置值后，在子线程中是获取不到的。根据上节的介绍，这应该是正常现象，**因为在子线程thread里面调用get方法时当前线程为thread线程，而这里调用set方法设置线程变量的是main线程，两者是不同的线程，自然子线程访问时返回null**。那么有没有办法让子线程能访问到父线程中的值？答案是有。
+
 #### InheritableThreadLocal类
 
+InheritableThreadLocal继承自ThreadLocal，其提供了一个特性，就是让子线程可以访问在父线程中设置的本地变量。
+
+```java
+public class InheritableThreadLocal<T> extends ThreadLocal<T> {
+    //(1)
+    protected T childValue(T parentValue) {
+        return parentValue;
+    }
+    //(2)
+    ThreadLocalMap getMap(Thread t) {
+       return t.inheritableThreadLocals;
+    }
+    //(3)
+    void createMap(Thread t, T firstValue) {
+        t.inheritableThreadLocals = new ThreadLocalMap(this, firstValue);
+    }
+}
+```
+
+InheritableThreadLocal继承了ThreadLocal，并重写了三个方法。由代码（3）可知，InheritableThreadLocal重写了createMap方法，那么现在当第一次调用set方法时，创建的是当前线程的inheritableThreadLocals变量的实例而不再是threadLocals。由代码（2）可知，当调用get方法获取当前线程内部的map变量时，获取的是inheritableThreadLocals而不再是threadLocals。
+
+**总结**：InheritableThreadLocal类通过重写代码（2）和（3）让本地变量保存到了具体线程的inheritableThreadLocals变量里面，那么线程在通过InheritableThreadLocal类实例的set或者get方法设置变量时，就会创建当前线程的inheritableThreadLocals变量。当父线程创建子线程时，构造函数会把父线程中inheritableThreadLocals变量里面的本地变量复制一份保存到子线程的inheritableThreadLocals变量里面。
+
+代码（1）修改为
+
+```java
+//（1）创建线程变量
+//    public static ThreadLocal<String> threadLocal = new ThreadLocal<String>();
+    public static ThreadLocal<String> threadLocal = new InheritableThreadLocal<>();
 
 
+main:hello world
+thread:hello world
+```
 
+可见，现在可以从子线程正常获取到线程变量的值了。
+
+那么在什么情况下需要子线程可以获取父线程的threadlocal变量呢？情况还是蛮多的，比如子线程需要使用存放在threadlocal变量中的用户登录信息，再比如一些中间件需要把统一的id追踪的整个调用链路记录下来。其实子线程使用父线程中的threadlocal方法有多种方式，比如创建线程时传入父线程中的变量，并将其复制到子线程中，或者在父线程中构造一个map作为参数传递给子线程，但是这些都改变了我们的使用习惯，所以在这些情况下InheritableThreadLocal就显得比较有用。
+
+## 并发编程的其他基础知识
+
+### 什么是多线程并发编程
+
+### 为什么要进行多线程并发编程
+
+### Java 中的线程安全问题
+
+### Java 中共享变量的内存可见性问题
+
+### Java 中的 synchronized 关键字
+
+### Java 中的 volatile 关键字
+
+### Java 中的原子操作
+
+### Java 中的 CAS 操作
+
+### Unsafe类
+
+### Java 指令重排序
+
+### 伪共存
+
+### 锁的概述
+
+### 总结
 

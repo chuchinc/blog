@@ -1241,3 +1241,169 @@ FROM bookinfo_zerobasis;
 | 零基础学JavaScript | 明日科技 | 0       |
 | 零基础学HTML5+CSS3 | 明日科技 | 1       |
 | 零基础学Oracle     | 明日科技 | 1       |
+
+## 数据排序
+
+### 数值排序
+
+#### 按升序和降序排列
+
+```sql
+ORDER BY { order_by_expression [ ASC | DESC ]} [ ,...n ]
+```
+
+```SQL
+SELECT goods_id, goods_name, sales_sum
+FROM goods
+ORDER BY sales_sum ASC ;
+```
+
+| goods\_id | goods\_name               | sales\_sum |
+| :-------- | :------------------------ | :--------- |
+| 39        | 华为 M2 10.0 平板电脑     | 0          |
+| 41        | 华为 M2 8英寸平板电脑     | 0          |
+| 49        | 荣耀畅玩5X 智能手机       | 0          |
+| 51        | 华为 Mate 8 64GB          | 0          |
+| 106       | 海尔 BCD-572WDPM电冰箱    | 0          |
+| 109       | 三星 BCD-535WKZM电冰箱    | 0          |
+| 114       | 索尼 D7200单反相机        | 0          |
+| 56        | 三星55M5 智能液晶电视     | 1          |
+| 58        | 海信 LED55EC290N 液晶电视 | 1          |
+| 57        | TCL D50A710 液晶电视      | 5          |
+
+#### 按照列别名排序
+
+```sql
+SELECT goods_id 商品编号,goods_name 商品名称,sales_sum 商品销量
+FROM goods
+ORDER BY 商品销量 DESC;
+```
+
+| 商品编号 | 商品名称                  | 商品销量 |
+| :------- | :------------------------ | :------- |
+| 57       | TCL D50A710 液晶电视      | 5        |
+| 56       | 三星55M5 智能液晶电视     | 1        |
+| 58       | 海信 LED55EC290N 液晶电视 | 1        |
+| 39       | 华为 M2 10.0 平板电脑     | 0        |
+| 41       | 华为 M2 8英寸平板电脑     | 0        |
+| 49       | 荣耀畅玩5X 智能手机       | 0        |
+| 51       | 华为 Mate 8 64GB          | 0        |
+| 106      | 海尔 BCD-572WDPM电冰箱    | 0        |
+| 109      | 三星 BCD-535WKZM电冰箱    | 0        |
+| 114      | 索尼 D7200单反相机        | 0        |
+
+```sql
+SELECT goods_id 商品编号,goods_name 商品名称,sales_sum '商品  销量'
+FROM goods
+ORDER BY '商品  销量' DESC;
+```
+
+| 商品编号 | 商品名称                  | 商品  销量 |
+| :------- | :------------------------ | :--------- |
+| 39       | 华为 M2 10.0 平板电脑     | 0          |
+| 41       | 华为 M2 8英寸平板电脑     | 0          |
+| 49       | 荣耀畅玩5X 智能手机       | 0          |
+| 51       | 华为 Mate 8 64GB          | 0          |
+| 56       | 三星55M5 智能液晶电视     | 1          |
+| 57       | TCL D50A710 液晶电视      | 5          |
+| 58       | 海信 LED55EC290N 液晶电视 | 1          |
+| 106      | 海尔 BCD-572WDPM电冰箱    | 0          |
+| 109      | 三星 BCD-535WKZM电冰箱    | 0          |
+| 114      | 索尼 D7200单反相机        | 0          |
+
+#### 对多列排序
+
+````sql
+SELECT goods_id,goods_name,shop_price
+FROM goods
+ORDER BY shop_price,goods_name;
+````
+
+| goods\_id | goods\_name               | shop\_price |
+| :-------- | :------------------------ | :---------- |
+| 49        | 荣耀畅玩5X 智能手机       | 999.00      |
+| 41        | 华为 M2 8英寸平板电脑     | 1588.00     |
+| 39        | 华为 M2 10.0 平板电脑     | 2288.00     |
+| 57        | TCL D50A710 液晶电视      | 2799.00     |
+| 58        | 海信 LED55EC290N 液晶电视 | 3199.00     |
+| 106       | 海尔 BCD-572WDPM电冰箱    | 3399.00     |
+| 109       | 三星 BCD-535WKZM电冰箱    | 3499.00     |
+| 51        | 华为 Mate 8 64GB          | 3699.00     |
+| 114       | 索尼 D7200单反相机        | 3699.00     |
+| 56        | 三星55M5 智能液晶电视     | 3799.00     |
+
+```sql
+SELECT goods_id,goods_name,shop_price
+FROM goods
+ORDER BY shop_price DESC ,goods_name DESC ;
+```
+
+| goods\_id | goods\_name               | shop\_price |
+| :-------- | :------------------------ | :---------- |
+| 56        | 三星55M5 智能液晶电视     | 3799.00     |
+| 114       | 索尼 D7200单反相机        | 3699.00     |
+| 51        | 华为 Mate 8 64GB          | 3699.00     |
+| 109       | 三星 BCD-535WKZM电冰箱    | 3499.00     |
+| 106       | 海尔 BCD-572WDPM电冰箱    | 3399.00     |
+| 58        | 海信 LED55EC290N 液晶电视 | 3199.00     |
+| 57        | TCL D50A710 液晶电视      | 2799.00     |
+| 39        | 华为 M2 10.0 平板电脑     | 2288.00     |
+| 41        | 华为 M2 8英寸平板电脑     | 1588.00     |
+| 49        | 荣耀畅玩5X 智能手机       | 999.00      |
+
+#### 对数据表中的指定行数进行排列
+
+##### 在SQL Server 中对数据表中的前几行数据进行排序
+
+```sql
+SELECT TOP 3 goods_id,goods_name,shop_price
+FROM goods
+ORDER BY shop_price DESC;
+```
+
+##### 在SQL Server 中对数据表中的后几行数据进行排序
+
+```sql
+SELECT TOP 1 goods_id,goods_name,shop_price
+FROM goods
+ORDER BY shop_price;
+```
+
+##### 在Oracle 中对数据表中的前几行数据进行排序
+
+```sql
+SELECT * FROM
+(SELECT "goods_id", "goods_name", "shop_price"
+FROM "goods" 
+ORDER BY "shop_price" DESC)
+WHERE rownum <= 3;
+```
+
+##### 在Oracle 中对数据表中的后几行数据进行排序
+
+```sql
+SELECT "goods_id", "goods_name", "shop_price"
+FROM (SELECT "goods_id", "goods_name", "shop_price" FROM "goods" ORDER BY "shop_price") 
+WHERE rownum = 1;
+```
+
+### 汉字排序
+
+#### 按姓氏拼音笔画排序
+
+```sql
+SELECT * FROM tb_name;
+SELECT *
+FROM tb_name
+ORDER BY LEFT(name,1) COLLATE Chinese_PRC_Stroke_CS_AS_KS_WS DESC;
+```
+
+#### 按拼音进行排序
+
+```sql
+SELECT * FROM tb_name;
+SELECT *
+FROM tb_name
+ORDER BY LEFT(name, 1) COLLATE Chinese_PRC_CS_AS_KS_WS DESC;
+```
+
