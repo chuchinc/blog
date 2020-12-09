@@ -2,7 +2,7 @@
 # 站点配置
 
 baseURL = "https://chuchin.cn/"
-title = "昨日不复来"
+title = "ChuChin"
 languageCode = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）

@@ -1,5 +1,5 @@
 ---
-title: "SCA核心组件 Dubbo整合"
+title: "SCA核心组件 Dubbo"
 date: 2020-10-17T10:21:43+08:00
 draft: false
 tags: ["Java","Spring Cloud","Dubbo"]
@@ -101,16 +101,63 @@ spring:
     allow-bean-definition-overriding: true
 ```
 
-![66522bc958e1077fca98a99d75b822d.png](https://i.loli.net/2020/12/08/houXcndA5SeCjvW.png)
+![20201209-143730-0927.png](https://gitee.com/chuchin/img/raw/master/20201209-143730-0927.png)
 
 ## 服务消费者工程改造
 
-1. 接下来改造服务消费者⼯程—>⾃动投递微服务
+1. 改造服务消费者⼯程—>⾃动投递微服务
    * pom.xml中删除OpenFeign相关内容
+   
    * application.yml配置⽂件中删除和Feign、Ribbon相关的内容；代码中删除Feign客户端内容；
+   
    * pom.xml添加内容和服务提供者⼀样
+   
    * application.yml配置⽂件中添加dubbo相关内容
+   
+     ```yaml
+     dubbo:
+       registry:
+         # 挂载到 Spring Cloud 的注册中⼼
+         address: spring-cloud://localhost
+       cloud:
+         subscribed-services: service-resume
+     spring:
+       main:
+         #Spring Boot 2.1 需要设置
+         allow-bean-definition-overriding: true
+     ```
+   
+   * controller代码改造，其他不变
+   
+     ```java
+     @RestController
+     @RequestMapping("/autodeliver")
+     public class AutodeliverController {
+     
+     	//引入dubbo的Reference
+         @Reference
+         private ResumeService resumeService;
+     
+     
+         @GetMapping("/checkState/{userId}")
+         @SentinelResource(value = "findResumeOpenState",blockHandlerClass = SentinelHandlersClass.class,
+                 blockHandler = "handleException",fallbackClass = SentinelHandlersClass.class,fallback = "handleError")
+         public Integer findResumeOpenState(@PathVariable Long userId) {
+             return resumeService.findDefaultResumeByUserId(userId);
+         }
+     
+     }
+     ```
+   
+2. 测试
 
 ```
+GET http://localhost:8099/autodeliver/checkState/1545136
+Accept: application/json
 
+###
+
+##返回
+3
 ```
+

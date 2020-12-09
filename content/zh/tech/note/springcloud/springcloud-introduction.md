@@ -1,5 +1,5 @@
 ---
-title: "Spring Cloud 综述"
+title: "Spring Cloud 简述"
 date: 2020-10-02T10:21:43+08:00
 draft: false
 tags: ["Java","Spring Cloud"]

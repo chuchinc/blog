@@ -5,7 +5,7 @@ draft: false
 tags: ["Java","并发编程"]
 ---
 
-![thread](/img/thread.jpg)
+![thread](/img/book/thread.jpg)
 
 该书在微信读书中上架，可以免费阅读，代码：[https://github.com/chuchinc/kl-book-resource](https://github.com/chuchinc/kl-book-resource)
 
@@ -21,7 +21,7 @@ tags: ["Java","并发编程"]
 
 进程和线程的关系如图：
 
-![thread](/img/thread1.jpg)
+![thread](/img/book/thread1.jpg)
 
 ### 线程的创建与运行
 
@@ -976,11 +976,11 @@ main线程运行结束后，JVM会自动启动一个叫作DestroyJavaVM的线程
 
 多线程访问同一个共享变量时特别容易出现并发问题，特别是在多个线程需要对一个共享变量进行写入时。
 
-![49e1896d0e49c1f6530551cf1134e66.png](https://i.loli.net/2020/12/07/Npsd1M6cKDAa8H9.png)
+![49e1896d0e49c1f6530551cf1134e66.png](/img/book/Npsd1M6cKDAa8H9.png)
 
 ThreadLocal是JDK包提供的，它提供了线程本地变量，也就是如果你创建了一个ThreadLocal变量，那么访问这个变量的每个线程都会有这个变量的一个本地副本。当多个线程操作这个变量时，实际操作的是自己本地内存里面的变量，从而避免了线程安全问题。创建一个ThreadLocal变量后，每个线程都会复制一个变量到自己的本地内存。
 
-![f8244f14cc03d8195499a355b6c10cb.png](https://i.loli.net/2020/12/07/8SKRXgk5sIruiQE.png)
+![f8244f14cc03d8195499a355b6c10cb.png](/img/book/8SKRXgk5sIruiQE.png)
 
 #### ThreadLocal使用示例
 
@@ -1047,7 +1047,7 @@ threadTwo remove after:null
 
 ThreadLocal相关类的类图结构：
 
-![80e10bd9080e1a8a2f8c4af3ccd8cae.png](https://i.loli.net/2020/12/07/1mZ8CThncvf3zHA.png)
+![80e10bd9080e1a8a2f8c4af3ccd8cae.png](/img/book/1mZ8CThncvf3zHA.png)
 
 Thread类中有一个threadLocals和一个inheritableThreadLocals，它们都是ThreadLocalMap类型的变量，而ThreadLocalMap是一个定制化的Hashmap。在默认情况下，每个线程中的这两个变量都为null，只有当前线程第一次调用ThreadLocal的set或者get方法时才会创建它们。其实每个线程的本地变量不是存放在ThreadLocal实例里面，而是存放在调用线程的threadLocals变量里面。也就是说，**ThreadLocal类型的本地变量存放在具体的线程内存空间中。ThreadLocal就是一个工具壳，它通过set方法把value值放入调用线程的threadLocals里面并存放起来，当调用线程调用它的get方法时，再从当前线程的threadLocals变量里面将其拿出来使用。如果调用线程一直不终止，那么这个本地变量会一直存放在调用线程的threadLocals变量里面**，所以当不需要使用本地变量时可以通过调用ThreadLocal变量的remove方法，从当前线程的threadLocals里面删除该本地变量。另外，Thread里面的threadLocals为何被设计为map结构？很明显是因为每个线程可以关联多个ThreadLocal变量。、
 
@@ -1138,7 +1138,7 @@ public void remove() {
 
 **总结**：在每个线程内部都有一个名为threadLocals的成员变量，该变量的类型为HashMap，其中key为我们定义的ThreadLocal变量的this引用，value则为我们使用set方法设置的值。每个线程的本地变量存放在线程自己的内存变量threadLocals中，如果当前线程一直不消亡，那么这些本地变量会一直存在，所以可能会造成内存溢出，因此使用完毕后要记得调用ThreadLocal的remove方法删除对应线程的threadLocals中的本地变量。
 
-![ee4d289f28aafbea0fc747060d07f79.png](https://i.loli.net/2020/12/07/n3HYiUS1ftgWE4N.png)
+![ee4d289f28aafbea0fc747060d07f79.png](/img/book/n3HYiUS1ftgWE4N.png)
 
 #### ThreadLocal不支持继承性
 
@@ -1239,3 +1239,4 @@ thread:hello world
 
 ### 总结
 
+​                                                                                                                                                              

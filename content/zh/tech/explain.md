@@ -22,23 +22,23 @@ tags: []
 - [x] 微服务架构介绍
 - [x] Spring Cloud 综述
 - [x] 案例引入
-- [ ] 第一代 Spring Cloud 核心组件 SCN
+- [x] 第一代 Spring Cloud 核心组件 SCN
   - [x] Eureka 服务注册中心
   - [x] Ribbon 负载均衡
   - [x] Hystrix 熔断器
   - [x] Feign 远程调用组件
   - [x] GateWay 网关组件
-  - [ ] Spring Cloud Config 分布式配置中心
-  - [ ] Spring Cloud Stream 消息驱动组件
-- [ ] 常见问题及解决方案
-- [ ] Spring Cloud 进阶
-  - [ ] 聚合监控 Turbine
-  - [ ] 链路追踪 Sleuth+Zipkin
-  - [ ] 统一认证 OAuth2+JWT
-- [ ] 第二代 Spring Cloud 核心组件 SCA
-  - [ ] Nacos 服务注册和配置中心
-  - [ ] Sentinel 流量卫兵
-  - [ ] Nacos + Sentinel + Dubbo
+  - [x] Spring Cloud Config 分布式配置中心
+  - [x] Spring Cloud Stream 消息驱动组件
+- [x] 常见问题及解决方案
+- [x] Spring Cloud 进阶
+  - [x] 聚合监控 Turbine
+  - [x] 链路追踪 Sleuth+Zipkin
+  - [x] 统一认证 OAuth2+JWT
+- [x] 第二代 Spring Cloud 核心组件 SCA
+  - [x] Nacos 服务注册和配置中心
+  - [x] Sentinel 流量卫兵
+  - [x] Nacos + Sentinel + Dubbo
 
 **存储技术**
 
