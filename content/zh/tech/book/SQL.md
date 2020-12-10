@@ -5,7 +5,7 @@ draft: false
 tags: ["SQL"]                       
 ---
 
-![sql](/img/sql.jpg)
+![20201210-131047-0048.jpg](https://gitee.com/chuchin/img/raw/master/20201210-131047-0048.jpg)
 
 京东入手的一本工具书，主要介绍SQL的知识，比较全，书中配套资料：[https://github.com/chuchinc/kl-book-resource](https://github.com/chuchinc/kl-book-resource)
 
@@ -1407,3 +1407,166 @@ FROM tb_name
 ORDER BY LEFT(name, 1) COLLATE Chinese_PRC_CS_AS_KS_WS DESC;
 ```
 
+## 数据统计分析
+
+### 聚合函数
+
+| 聚合函数         | 支持的数据类型       | 功能描述                                             |
+| ---------------- | -------------------- | ---------------------------------------------------- |
+| SUM()            | 数字                 | 对特定列中的所有非空值求和                           |
+| AVG()            | 数字                 | 对指定列中的所有非空值求平均数                       |
+| MIN()            | 数字、字符、日期     | 返回指定列中的最小数字、最小的字符串和最早的日期时间 |
+| MAX()            | 数字、字符、日期     | 返回指定列中的最大数字、最大的字符串和最近的日期时间 |
+| COUNT([disinct]) | 任意基于行的数据类型 | 统计结果集中全部记录行的数量，最多可达2147483647行   |
+
+### 求平均值
+
+```sql
+AVG([DISTINCT] expression)
+```
+
+#### AVG() 函数的普通用法
+
+```sql
+SELECT AVG(shop_price) AS 平均值
+FROM goods;
+```
+
+| 平均值      |
+| :---------- |
+| 2896.800000 |
+
+#### 使用WHERE 子句限制 AVG() 函数统计的行
+
+```sql
+SELECT AVG(shop_price) AS 平均值
+FROM goods
+WHERE shop_price > 3000;
+```
+
+| 平均值      |
+| :---------- |
+| 3549.000000 |
+
+### 获取结果集数
+
+```sql
+COUNT( [DISTINCT] *|expression)
+```
+
+```sql
+SELECT COUNT(*) AS 商品个数
+FROM goods
+WHERE (shop_price > 3000);
+```
+
+| 商品个数 |
+| :------- |
+| 6        |
+
+```sql
+SELECT COUNT(cat_id) AS 商品种类
+FROM goods;
+```
+
+| 商品种类 |
+| :------- |
+| 10       |
+
+### 最大值与最小值
+
+```sql
+MAX([DISTINCT]expression)
+MIN([DISTINCT]expression)
+```
+
+```sql
+SELECT CAST(AVG(shop_price) as real) AS 去掉最大值与最小值的平均值 FROM goods
+WHERE goods_name LIKE '%液晶电视%'
+AND shop_price NOT IN(
+(SELECT MIN(shop_price) AS 最小值 FROM goods WHERE goods_name LIKE '%液晶电视%')
+UNION
+(SELECT max(shop_price) AS 最大值 FROM goods WHERE goods_name LIKE '%液晶电视%'));
+```
+
+| 去掉最大值与最小值的平均值 |
+| :------------------------- |
+| 3199                       |
+
+### 对多列求和
+
+```sql
+SUM([DISTINCT]expression)
+```
+
+```sql
+SELECT SUM(shop_price) AS 所有商品价格总和
+FROM goods;
+```
+
+| 所有商品价格总和 |
+| :--------------- |
+| 28968.00         |
+
+```sql
+SELECT SUM(shop_price-cost_price) AS 所有商品的总盈利
+FROM goods;
+```
+
+| 所有商品的总盈利 |
+| :--------------- |
+| 3426.00          |
+
+```sql
+SELECT SUM(DISTINCT shop_price) AS 所有商品价格总和
+FROM goods;
+```
+
+| 所有商品价格总和 |
+| :--------------- |
+| 25269.00         |
+
+### 在WHERE子句中使用聚合函数
+
+```sql
+SELECT user_id,email, birthday,total_amount
+FROM users WHERE (birthday BETWEEN '1985-01-01' AND '1990-12-31')
+AND (total_amount > (SELECT AVG(total_amount) FROM users));
+```
+
+| user\_id | email            | birthday            | total\_amount |
+| :------- | :--------------- | :------------------ | :------------ |
+| 1        | 240874144@qq.com | 1986-03-03 16:00:00 | 63136.04      |
+
+### Oracle 数据库的NVL()函数在聚合函数中的使用
+
+```sql
+NVL(string, replace_with)
+```
+
+如果string为NULL，则NVL函数返回replace_with的值，否则返回string的值，如果两个参数都为NULL，则返回NULL
+
+* 数字型：NVL(comm,0)
+* 字符型：NVL(TO_CHAR(comm),'NO Commission')
+* 日期型：NVL(hiredate,'28-DEC-14')
+
+```sql
+SELECT NVL("Type",'没有分类') 丛书系列名称,
+COUNT(NVL("Type",'没有分类')) 系列中图书个数
+FROM "bookinfo"
+GROUP BY NVL("Type",'没有分类');
+```
+
+### 多个聚合函数的使用
+
+#### 使用多个聚合函数的注意事项
+
+1. 多个聚合函数在SQL Server中不能嵌套(Oracle可以)
+2. 子查询不能作为一个聚合函数的表达式
+
+#### 聚合函数的执行步骤
+
+1. 首先生成一个中间表
+2. 如果在SELECT语句中存在一个WHERE子句，就对中间表中每一行根据其搜索条件进行求值，清除那些求值结果为FALSE或NULL的行，保留那些求值结果为TRUE的行
+3. 使用中间表的值来计算每个聚合函数的值
+4. 将每个聚合函数统计的值作为结果表中的列值显示

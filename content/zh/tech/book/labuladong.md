@@ -5,6 +5,6 @@ draft: false
 tags: ["Java"]
 ---
 
-![l](/img/labuladong.jpg)
+![20201210-131047-0038.jpg](https://gitee.com/chuchin/img/raw/master/20201210-131047-0038.jpg)
 
 博主公众号粉丝，微信公众号名就叫“labuladong”，预售拿到了这本书，大部分内容来自公众号文章和pdf，纯支持。
