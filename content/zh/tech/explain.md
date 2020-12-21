@@ -15,7 +15,7 @@ tags: []
 
 ## 笔记
 
-**<center>内容都经过实践，源码仅供参考，欢迎勘误</center>**
+**<center>源码仅供参考</center>**
 
 **Spring Cloud系列**
 
@@ -44,12 +44,12 @@ tags: []
 
 **MySQL 系列**
 
-- [ ] MySQL 简介
+- [x] MySQL 简介
 
-- [ ] MySQL 架构原理
-- [ ] MySQL 索引原理
-- [ ] MySQL 事务和锁
-- [ ] MySQL 集群架构
+- [x] MySQL 架构原理
+- [x] MySQL 索引原理
+- [x] MySQL 事务和锁
+- [x] MySQL 集群架构
 - [ ] 分库分表及中间件
 - [ ] 运维和第三方工具 
 

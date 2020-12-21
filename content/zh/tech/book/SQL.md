@@ -1570,3 +1570,185 @@ GROUP BY NVL("Type",'没有分类');
 2. 如果在SELECT语句中存在一个WHERE子句，就对中间表中每一行根据其搜索条件进行求值，清除那些求值结果为FALSE或NULL的行，保留那些求值结果为TRUE的行
 3. 使用中间表的值来计算每个聚合函数的值
 4. 将每个聚合函数统计的值作为结果表中的列值显示
+
+##   分组统计
+
+### 创建分组
+
+#### 使用GROUP BY 子句创建分组
+
+如果使用 GROUP BY 子句进行分组查询，SELECT 查询的列必须包含在 GROUP BY 子句中或者包含在聚合函数中
+
+```mysql
+SELECT cat_id, MIN(shop_price) 最低售价,
+MAX(cost_price) 最高成本价 ,AVG(shop_price) 平均售价, COUNT(*) AS 个数
+FROM goods
+GROUP BY cat_id
+ORDER BY MAX(cost_price) DESC;
+```
+
+| cat\_id | 最低售价 | 最高成本价 | 平均售价    | 个数 |
+| :------ | :------- | :--------- | :---------- | :--- |
+| 123     | 999.00   | 3500.00    | 2349.000000 | 2    |
+| 130     | 2799.00  | 3500.00    | 3265.666667 | 3    |
+| 131     | 3399.00  | 3299.00    | 3449.000000 | 2    |
+| 104     | 3699.00  | 3100.00    | 3699.000000 | 1    |
+| 191     | 1588.00  | 1500.00    | 1938.000000 | 2    |
+
+#### 使用 GROUP BY 子句创建多列分组
+
+```mysql
+SELECT cat_id, brand_id, MIN(shop_price) 最低售价,
+MAX(cost_price) 最高成本价 ,AVG(shop_price) 平均售价, COUNT(*) AS 个数
+FROM goods
+GROUP BY cat_id, brand_id
+ORDER BY MAX(cost_price) DESC;
+```
+
+| cat\_id | brand\_id | 最低售价 | 最高成本价 | 平均售价    | 个数 |
+| :------ | :-------- | :------- | :--------- | :---------- | :--- |
+| 123     | 1         | 999.00   | 3500.00    | 2349.000000 | 2    |
+| 130     | 15        | 3799.00  | 3500.00    | 3799.000000 | 1    |
+| 131     | 15        | 3499.00  | 3299.00    | 3499.000000 | 1    |
+| 131     | 14        | 3399.00  | 3155.00    | 3399.000000 | 1    |
+| 104     | 4         | 3699.00  | 3100.00    | 3699.000000 | 1    |
+| 130     | 19        | 3199.00  | 2988.00    | 3199.000000 | 1    |
+| 130     | 6         | 2799.00  | 2400.00    | 2799.000000 | 1    |
+| 191     | 1         | 1588.00  | 1500.00    | 1938.000000 | 2    |
+
+#### 对表达式进行分组统计
+
+```mysql
+SELECT 收货地址, 联系方式
+FROM (SELECT '收货人：'+ consignee + ' 的地址为: ' + address  AS 收货地址,
+      '联系电话为：' + mobile  AS 联系方式 FROM user_address) a
+GROUP BY 收货地址, 联系方式;
+```
+
+| 收货地址 | 联系方式    |
+| :------- | :---------- |
+| 0        | 13554754891 |
+| 0        | 13554745866 |
+| 0        | 13800138000 |
+| 0        | 13012345678 |
+| 0        | 13554754711 |
+| 0        | 13554754132 |
+| 0        | 18988888888 |
+
+### 在统计中使用 ROLLUP 关键字和 CUBE 关键字
+
+rollup 首先对abc进行分组 ab分组 a分组
+
+cube 会对ab出现的每种可能性分组
+
+```mysql
+SELECT e.deptno, d.dname, SUM(e.sal) AS 工资总和
+FROM emp e,dept d
+WHERE e.deptno = d.deptno
+GROUP BY ROLLUP(e.deptno, d.dname);
+```
+
+```mysql
+SELECT e.deptno, d.dname, SUM(e.sal) AS 工资总和
+FROM emp e,dept d
+WHERE e.deptno = d.deptno
+GROUP BY e.deptno, d.dname WITH ROLLUP;
+```
+
+```mysql
+（1）
+SELECT e.deptno, d.dname, SUM(e.sal) AS 工资总和
+FROM emp e,dept d
+WHERE e.deptno = d.deptno
+GROUP BY CUBE(e.deptno, d.dname);
+
+（2）
+SELECT e.deptno, d.dname, SUM(e.sal) AS 工资总和
+FROM emp e,dept d
+WHERE e.deptno = d.deptno
+GROUP BY e.deptno, d.dname WITH CUBE;
+```
+
+### GROUP BY 子句的 NULL 值处理
+
+```mysql
+SELECT oauth AS 第三方付款方式, COUNT(*)AS 个数
+FROM users
+GROUP BY oauth;
+```
+
+| 第三方付款方式 | 个数 |
+| :------------- | :--- |
+|                | 4    |
+| alipay         | 2    |
+| qq             | 2    |
+
+### 使用HAVING 子句进行过滤分组
+
+```mysql
+SELECT cat_id, shop_price, COUNT(cat_id) AS 个数
+FROM goods
+WHERE (store_count < 1000)
+GROUP BY cat_id,shop_price
+HAVING (shop_price >
+          (SELECT AVG(shop_price)
+          FROM goods))
+ORDER BY shop_price DESC;
+```
+
+| cat\_id | shop\_price | 个数 |
+| :------ | :---------- | :--- |
+| 130     | 3799.00     | 1    |
+| 130     | 3199.00     | 1    |
+
+### 对统计结果进行排序
+
+```mysql
+SELECT cat_id, COUNT(cat_id) AS 商品个数
+FROM goods
+GROUP BY cat_id
+ORDER BY 商品个数 DESC;
+```
+
+| cat\_id | 商品个数 |
+| :------ | :------- |
+| 130     | 3        |
+| 191     | 2        |
+| 123     | 2        |
+| 131     | 2        |
+| 104     | 1        |
+
+### GROUP BY 子句的特殊用法
+
+```mysql
+SELECT AVG(shop_price) AS 平均售价
+FROM goods
+GROUP BY cat_id;
+```
+
+| cat\_id | 商品个数 |
+| :------ | :------- |
+| 130     | 3        |
+| 191     | 2        |
+| 123     | 2        |
+| 131     | 2        |
+| 104     | 1        |
+
+```mysql
+SELECT "cat_id", ROUND(AVG("shop_price")) AS 平均售价
+FROM "goods"
+GROUP BY "cat_id"
+ORDER BY AVG("shop_price");
+```
+
+### SELECT 子句的顺序
+
+| 子句     | 说明               | 是否必须使用           |
+| -------- | ------------------ | ---------------------- |
+| SELECT   | 返回列或者表达式   | 是                     |
+| FROM     | 从中要检索数据的表 | 是                     |
+| WHERE    | 行级过滤           | 否                     |
+| GROUP BY | 分组统计           | 仅在按组计算聚集时使用 |
+| HAVING   | 组级过滤           | 否                     |
+| ORDER BY | 对输出数据排序     | 否                     |
+
