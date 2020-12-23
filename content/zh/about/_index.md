@@ -4,13 +4,7 @@ date: 2020-10-05T14:16:23+08:00
 draft: false
 ---
 
-
-
-
-
-
-
-![go](/img/go.png)
+![20201222-160605-0946.png](https://gitee.com/chuchin/img/raw/master/20201222-160605-0946.png)
 
 嗨你好，这里是ChuChin的博客，用于构建自己认知体系，方便检索和回顾，现居深圳。
 

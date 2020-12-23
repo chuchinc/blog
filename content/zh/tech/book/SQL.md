@@ -1752,3 +1752,127 @@ ORDER BY AVG("shop_price");
 | HAVING   | 组级过滤           | 否                     |
 | ORDER BY | 对输出数据排序     | 否                     |
 
+##   
+
+##  简单子查询
+
+### 简单子查询
+
+#### 子查询的语法
+
+```mysql
+(SELECT [ALL | DISTINCT]<select item list>
+FROM <table list>
+[WHERE<search condition>]
+[GROUP BY <group item list>]
+[HAVING <group by search condition>]]
+)
+```
+
+#### 子查询常用的语法格式
+
+1. 第一种语法格式
+
+   ```mysql
+   WHERE 查询表达式 [NOT] IN 子查询
+   ```
+
+2. 第二种语法格式
+
+   ```mysql
+   WHERE 查询表达式 比较运算符 [ ANY | ALL ](子查询)
+   ```
+
+3. 第三种语法格式
+
+   ```mysql
+   WHERE [NOT] EXISTS(子查询)
+   ```
+
+
+#### 子查询和其他SELECT语句之间的区别
+
+除了子查询必须在括号中出现之外
+
+1. SELECT语句只能使用那些来自FROM子句中的表和列，子查询不仅可以使用在该子查询中的FROM子句中的表，而且还可以使用子查询的FROM子句中表的任何列
+2. SELECT语句中的子查询必须返回单一数据列。另外，根据其在查询中的使用方法（如将子查询结果用作包括子查询的SELECT子句中的一个数据项），包括子查询的查询可能要求子查询返回单个值（而不是来自单列的多个值）
+3. 子查询不能有ORDER BY子句
+4. 子查询必须由一个SELECT语句组成，也就不是将多个SQL语句用UNION组合起来作为一个子查询
+
+### SELECT 列表中的子查询
+
+```mysql
+SELECT tb_book_author,tb_author_department, 
+   (SELECT max(book_price)
+      FROM tb_book 
+      WHERE tb_book_author.tb_book_author=tb_book.tb_book_author) 
+FROM tb_book_author;
+```
+
+| tb\_book\_author | tb\_author\_department | \(SELECT max\(book\_price\)<br/>      FROM tb\_book<br/>      WHERE tb\_book\_author.tb\_book\_author=tb\_book.tb\_book\_author\) |
+| :--------------- | :--------------------- | :----------------------------------------------------------- |
+| 潘一             | PHP                    | 89.0000                                                      |
+| 刘一             | PHP                    | 78.0000                                                      |
+| 郭一             | VC                     | 89.0000                                                      |
+| 王一             | VC                     | 79.0000                                                      |
+
+### 多列子查询
+
+#### 成对比较的多列子查询
+
+```oracle
+SELECT ename, job, sal
+FROM emp
+WHERE (sal, job) IN (SELECT MAX(ssal), job FROM emp GROUP BY job)
+```
+
+### 非成对比较的多列子查询
+
+```mysql
+SELECT ename, job, sal 
+FROM emp
+WHERE sal in(SELECT MAX(sal) FROM emp GROUP BY job)
+AND
+job IN(SELECT  distinct job FROM emp);
+```
+
+### 比较子查询
+
+#### 使用比较运算符连接子查询
+
+```mysql
+SELECT cat_id,goods_name 
+FROM goods
+WHERE cat_id>(
+    SELECT cat_id
+    FROM brand
+    WHERE name='蓝月亮'
+);
+```
+
+| cat\_id | goods\_name               |
+| :------ | :------------------------ |
+| 191     | 华为 M2 10.0 平板电脑     |
+| 191     | 华为 M2 8英寸平板电脑     |
+| 123     | 荣耀畅玩5X 智能手机       |
+| 123     | 华为 Mate 8 64GB          |
+| 130     | 三星55M5 智能液晶电视     |
+| 130     | TCL D50A710 液晶电视      |
+| 130     | 海信 LED55EC290N 液晶电视 |
+| 131     | 海尔 BCD-572WDPM电冰箱    |
+| 131     | 三星 BCD-535WKZM电冰箱    |
+| 104     | 索尼 D7200单反相机        |
+
+#### 子查询易错点
+
+1. 子查询不能返回多个值
+2. 子查询不能返回包含ORDER BY子句
+
+### 在子查询中使用聚合函数
+
+```mysql
+SELECT ename,sal,job
+FROM emp
+WHERE sal > (SELECT AVG(sal)FROM emp);
+```
+
