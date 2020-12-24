@@ -2,7 +2,7 @@
 title: "labuladong的算法小抄"
 date: 2020-12-06T21:52:04+08:00
 draft: false
-tags: ["Java"]
+tags: ["算法"]
 ---
 
 ![20201210-131047-0038.jpg](https://gitee.com/chuchin/img/raw/master/20201210-131047-0038.jpg)
