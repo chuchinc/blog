@@ -1752,8 +1752,6 @@ ORDER BY AVG("shop_price");
 | HAVING   | 组级过滤           | 否                     |
 | ORDER BY | 对输出数据排序     | 否                     |
 
-##   
-
 ##  简单子查询
 
 ### 简单子查询
@@ -1874,5 +1872,81 @@ WHERE cat_id>(
 SELECT ename,sal,job
 FROM emp
 WHERE sal > (SELECT AVG(sal)FROM emp);
+```
+
+## 多行子查询
+
+### 使用 IN、NOT IN 操作符的多行子查询
+
+#### 使用 IN 子查询实现交集运算
+
+```mysql
+SELECT * 
+FROM tb_book
+WHERE book_sort IN (
+    SELECT tb_author_department 
+    FROM tb_book_author
+    WHERE tb_book.book_sort=tb_book_author.tb_author_department)
+ORDER BY tb_book.book_price;
+```
+
+#### 使用 NOT IN 子查询实现差集运算
+
+```mysql
+SELECT * 
+FROM tb_book
+WHERE book_sort NOT IN (
+    SELECT tb_author_department 
+    FROM tb_book_author);
+```
+
+### EXISTS 子查询与 NOT EXISTS 子查询
+
+#### EXISTS 子查询实现两个表的交集
+
+```mysql
+SELECT * 
+FROM tb_book
+WHERE EXISTS (
+    SELECT tb_author_department 
+    FROM tb_book_author
+    WHERE tb_book.book_sort=tb_book_author.tb_author_department)
+ORDER BY tb_book.book_price;
+```
+
+#### NOT EXISTS 子查询实现两个表的差集
+
+```mysql
+SELECT * 
+FROM tb_book
+WHERE NOT EXISTS(
+    SELECT tb_author_department
+    FROM tb_book_author
+    WHERE tb_book.book_sort=tb_book_author.tb_author_department );
+```
+
+### 通过量词实现多行子查询
+
+#### 使用量词实现多行子查询
+
+```mysql
+SELECT cat_id,goods_name,shop_price
+FROM goods
+WHERE shop_price < all(
+    SELECT AVG(shop_price)
+    FROM goods
+    GROUP BY cat_id);
+
+```
+
+#### 使用 ALL 操作符的多行子查询
+
+```mysql
+SELECT cat_id,goods_name,shop_price
+FROM goods
+WHERE shop_price > ANY(
+    SELECT AVG(shop_price)
+    FROM goods
+    GROUP BY cat_id);
 ```
 
