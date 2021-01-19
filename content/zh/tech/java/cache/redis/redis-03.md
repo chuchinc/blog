@@ -204,7 +204,6 @@ tags: ["Redis"]
 3. 添加配置类 RedisConfig
 
    ```java
-   package com.lagou.sbr.cache;
    import org.springframework.beans.factory.annotation.Autowired;
    import org.springframework.context.annotation.Bean;
    import org.springframework.context.annotation.Configuration;
@@ -226,11 +225,10 @@ tags: ["Redis"]
            return redisTemplate;
    } }
    ```
-
+   
 4. 添加 RedisController
 
    ```java
-   package com.lagou.sbr.controller;
    import org.springframework.beans.factory.annotation.Autowired;
    import org.springframework.data.redis.core.RedisTemplate;
    import org.springframework.web.bind.annotation.GetMapping;
@@ -255,11 +253,10 @@ tags: ["Redis"]
        }
    }
    ```
-
+   
 5. 修改Application并运行
 
    ```java
-   package com.lagou.sbr;
    import org.springframework.boot.SpringApplication;
    import org.springframework.boot.autoconfigure.SpringBootApplication;
    import org.springframework.cache.annotation.EnableCaching;
@@ -270,7 +267,6 @@ tags: ["Redis"]
            SpringApplication.run(SpringbootRedisApplication.class, args);
    } }
    ```
-
    
 
    
