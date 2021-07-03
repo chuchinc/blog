@@ -186,14 +186,14 @@ uglyURLs = false
     #     post = "home"
     [[menu.main]]
         url = "/categories/"
-        name = "分区"
+        name = "技术"
         weight = 1
         pre = "internal"
         post = "th"
         identifier = "categories"
     [[menu.main]]
-        url = "/book/"
-        name = "书影"
+        url = "/trade/"
+        name = "交易"
         weight = 2
         pre = "internal"
         post = "grav"
@@ -380,7 +380,7 @@ uglyURLs = false
     # `sections`，则无法关闭树状布局
 
     # 是否显示文章标题
-    displayPosts = true
+    displayPosts = false
 
     # 是否显示每一分类下的文章数
     displayPostsCount = true
