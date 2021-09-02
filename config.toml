@@ -92,7 +92,7 @@ uglyURLs = false
 # 作者信息
 [author]
     # 名字
-    name = "ChinHeng-Chu"
+    name = "Chu"
     # 邮箱
     email = "edmond1122@foxmail.com"
     # 座右铭或简介
@@ -102,7 +102,7 @@ uglyURLs = false
     # 网站（默认值：baseURL）
     website = "https://chuchin.cn/"
     # 推特
-    #twitter = ""
+    #twitter = "https://twitter.com/ChuChinRCC"
 
 # 相关文章
 [related]
@@ -192,8 +192,8 @@ uglyURLs = false
         post = "th"
         identifier = "categories"
     [[menu.main]]
-        url = "/trade/"
-        name = "交易"
+        url = "/other/"
+        name = "杂坛"
         weight = 2
         pre = "internal"
         post = "grav"
@@ -307,7 +307,7 @@ uglyURLs = false
 
     ## 「诗意人生」
     # 诗句，支持 Markdown
-    homePoetry = ["不知道从什么时候开始","每个东西上面都有个日期","秋刀鱼会过期","肉罐头会过期","连保鲜纸都会过期","我开始怀疑","在这个世界上","还有什么东西是不会过期的"]
+    homePoetry = ["*On her way to work one morning*","*Down the path alongside the lake*","*A tender-hearted woman saw a poor half-frozen snake*","*His pretty colored skin had been all frosted with the dew*","*“Oh well,” she cried*","*“I’ll take you in and I’ll take care of you”*","*“Take me in oh tender woman*","*Take me in, for heaven’s sake*","*Take me in oh tender woman,”*","*sighed the snake*"]    
     # 底部链接的内间距，单位：em
     homeLinksPadding = 1
 

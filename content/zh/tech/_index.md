@@ -1,5 +1,5 @@
 +++
-title = "Tech"
+title = "TECH"
 
 +++
 
